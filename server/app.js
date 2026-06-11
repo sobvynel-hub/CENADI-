@@ -21,10 +21,22 @@ const app = express();
 // ─── Sécurité ────────────────────────────────────────────────────────────────
 app.use(helmet());
 
-// CORS – Autoriser le front-end React
+// CORS – Liste des origines autorisées (Local et Production Vercel)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://cenadi-rho.vercel.app'
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      // Permet aux requêtes sans origine (comme Postman ou outils de test) de passer
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Bloqué par la politique CORS du CENADI'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
