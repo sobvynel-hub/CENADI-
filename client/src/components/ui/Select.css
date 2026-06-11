@@ -1,0 +1,2 @@
+.select-wrapper { display: flex; flex-direction: column; gap: 0.5rem; }
+.select-input { padding: 0.75rem; border: 1px solid #cbd5e0; border-radius: 0.5rem; }

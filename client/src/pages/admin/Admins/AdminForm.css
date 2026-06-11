@@ -1,0 +1,84 @@
+/* AdminForm.css — Styles du formulaire de création/édition d'administrateur */
+
+.admin-form-header {
+  margin-bottom: 1.5rem;
+}
+
+.admin-form-header h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--slate-900, #0f172a);
+}
+
+.admin-form-header p {
+  font-size: 0.875rem;
+  color: var(--slate-500, #64748b);
+  margin-top: 0.25rem;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-form-full {
+  grid-column: 1 / -1;
+}
+
+.admin-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.admin-role-selector {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.admin-role-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fff;
+}
+
+.admin-role-option:hover {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.admin-role-option.selected {
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+
+.admin-role-option .role-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.admin-role-option .role-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-align: center;
+}

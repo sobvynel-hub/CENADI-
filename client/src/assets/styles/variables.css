@@ -1,0 +1,37 @@
+:root {
+  --brand: #1f8a4a;
+  --brand-100: #e8f5eb;
+  --brand-200: #c6ebd1;
+  --brand-300: #87d297;
+  --brand-400: #4fb96b;
+  --brand-500: #1f8a4a;
+  --brand-600: #146334;
+  --brand-700: #0f4f28;
+  --brand-800: #0a3b1f;
+  --brand-900: #062917;
+
+  --bg: #f8faf8;
+  --surface: #ffffff;
+  --surface-soft: #f5faf5;
+  --text: #0f172a;
+  --muted: #52606d;
+  --border: #d9e7dc;
+  --shadow: 0 24px 80px rgba(31, 138, 74, 0.1);
+  --radius: 1.25rem;
+  --radius-sm: 1rem;
+  --max-page-width: 1200px;
+  --font-sans: 'Plus Jakarta Sans', 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Utiliser .dark au lieu de [data-theme='dark'] pour compatibilité Tailwind */
+.dark {
+  --bg: #07150f;
+  --surface: #0f1f16;
+  --surface-soft: #12281e;
+  --text: #f8faf8;
+  --muted: #94a3b8;
+  --border: #183029;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+  --brand-100: rgba(31, 138, 74, 0.14);
+  --brand-200: rgba(31, 138, 74, 0.2);
+}

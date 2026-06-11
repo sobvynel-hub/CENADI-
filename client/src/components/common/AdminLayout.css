@@ -1,0 +1,31 @@
+/* AdminLayout.css - Styles for Admin Layout */
+/* Tailwind CSS is the primary styling approach
+   This file can be used for component-specific adjustments if needed
+*/
+
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.admin-layout__sidebar {
+  flex: 0 0 auto;
+}
+
+.admin-layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-layout__navbar {
+  flex: 0 0 auto;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.admin-layout__content {
+  flex: 1;
+  overflow-y: auto;
+}

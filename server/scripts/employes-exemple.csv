@@ -1,0 +1,4 @@
+employeeId,firstName,lastName,email,division,position,phone
+CEN-EMP-003,Charles,Ngono,charles.ngono@cenadi.cm,DSI,Analyste,+237 6XX XXX XXX
+CEN-EMP-004,Isabelle,Mvondo,isabelle.mvondo@cenadi.cm,RH,Assistante RH,+237 6XX XXX XXX
+CEN-EMP-005,David,Fouda,david.fouda@cenadi.cm,Finance,Comptable,+237 6XX XXX XXX

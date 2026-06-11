@@ -1,0 +1,508 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   VARIABLES POUR LE THÈME (y compris toasts)
+   ======================================== */
+:root {
+  --toast-bg: #ffffff;
+  --toast-color: #0f172a;
+  --toast-border: #e2e8f0;
+  --toast-icon-bg: #ffffff;
+}
+
+.dark {
+  --toast-bg: #1e293b;
+  --toast-color: #f1f5f9;
+  --toast-border: #334155;
+  --toast-icon-bg: #1e293b;
+}
+
+/* ========================================
+   FORCER le fond sombre sur TOUTE la page
+   ======================================== */
+.dark,
+.dark body,
+.dark #root,
+.dark .min-h-screen,
+.dark .h-screen,
+.dark main,
+.dark .flex-1,
+.dark .overflow-y-auto,
+.dark .p-6,
+.dark .bg-white {
+  background-color: #0a0a0a !important;
+}
+
+/* ========================================
+   FORCER TOUS LES TEXTES EN CLAIR (mode sombre)
+   ======================================== */
+.dark,
+.dark *,
+.dark body,
+.dark p,
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
+.dark span,
+.dark div:not(.card):not(.stat-card):not(.hero-section),
+.dark label,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700,
+.dark .text-black {
+  color: #f3f4f6 !important;
+}
+
+/* Texte secondaire (gris clair) - version corrigée sans @apply */
+.dark .text-slate-500,
+.dark .text-slate-400,
+.dark .text-gray-500,
+.dark .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+/* ========================================
+   TOASTS (notifications) - MODE SOMBRE
+   ======================================== */
+/* Style global des toasts */
+.go-toast {
+  background: var(--toast-bg) !important;
+  color: var(--toast-color) !important;
+  border: 1px solid var(--toast-border) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Icônes des toasts en mode sombre */
+.dark .go-toast .go-toast-icon {
+  filter: brightness(1.1);
+}
+
+/* Toast de succès */
+.go-toast.go-toast-success {
+  border-left: 4px solid #10b981 !important;
+}
+
+.dark .go-toast.go-toast-success {
+  border-left: 4px solid #22c55e !important;
+}
+
+/* Toast d'erreur */
+.go-toast.go-toast-error {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.dark .go-toast.go-toast-error {
+  border-left: 4px solid #f87171 !important;
+}
+
+/* Toast de chargement */
+.go-toast.go-toast-loading {
+  border-left: 4px solid #6366f1 !important;
+}
+
+.dark .go-toast.go-toast-loading {
+  border-left: 4px solid #818cf8 !important;
+}
+
+/* Animation des toasts */
+.go-toast {
+  animation: slideInRight 0.3s ease-out !important;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ========================================
+   SECTION HERO (mode sombre)
+   ======================================== */
+.dark .hero-section,
+.dark .bg-gradient-to-br {
+  background: linear-gradient(135deg, #0a3b1f 0%, #14532d 50%, #1a7a3c 100%) !important;
+}
+
+.dark .hero-section .text-white,
+.dark .bg-gradient-to-br .text-white {
+  color: #ffffff !important;
+}
+
+.dark .hero-section .text-primary-200,
+.dark .bg-gradient-to-br .text-primary-200 {
+  color: #86efac !important;
+}
+
+.dark .hero-section .text-primary-100,
+.dark .bg-gradient-to-br .text-primary-100 {
+  color: #bbf7d0 !important;
+}
+
+.dark .hero-section .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark .hero-section .border-white\/20 {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.dark .hero-section .bg-white {
+  background-color: #ffffff !important;
+  color: #166534 !important;
+}
+
+.dark .hero-section .bg-white:hover {
+  background-color: #f0fdf4 !important;
+}
+
+.dark .hero-section .text-primary-700 {
+  color: #166534 !important;
+}
+
+.dark .hero-section button,
+.dark .hero-section a:not(.bg-white\/10) {
+  background-color: #ffffff !important;
+  color: #166534 !important;
+}
+
+.dark .hero-section button:hover,
+.dark .hero-section a:not(.bg-white\/10):hover {
+  background-color: #f0fdf4 !important;
+}
+
+/* Mode sombre spécifique pour la hero section (effet glass) */
+.dark .hero-section.glass-hero {
+  background: radial-gradient(ellipse at 30% 40%, rgba(34, 197, 94, 0.08), transparent 50%),
+              radial-gradient(ellipse at 70% 60%, rgba(34, 197, 94, 0.05), transparent 50%),
+              linear-gradient(135deg, #0a0a0a 0%, #0f0f15 50%, #1a1a2a 100%);
+}
+
+/* ========================================
+   CARTES ET SURFACES
+   ======================================== */
+.dark .card,
+.dark .stat-card {
+  background-color: #1a1a1a !important;
+  border-color: #2a2a2a !important;
+}
+
+/* ========================================
+   INPUTS ET FORMULAIRES
+   ======================================== */
+.dark input,
+.dark select,
+.dark textarea,
+.dark .input-field {
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+  color: #f3f4f6 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+/* ========================================
+   TABLES
+   ======================================== */
+.dark .table-header {
+  background-color: #1f2937 !important;
+  border-bottom-color: #374151 !important;
+}
+
+.dark .table-header th {
+  color: #9ca3af !important;
+}
+
+.dark .table-row td {
+  color: #d1d5db !important;
+}
+
+.dark .table-row:hover {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+/* ========================================
+   BADGES
+   ======================================== */
+.dark .badge-green {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+.dark .badge-orange {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+}
+
+.dark .badge-red {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
+.dark .badge-slate {
+  background-color: #2a2a2a !important;
+  color: #9ca3af !important;
+}
+
+/* ========================================
+   STATISTIQUES (icônes)
+   ======================================== */
+.dark .stat-icon {
+  background-color: #2a2a2a !important;
+}
+
+.dark .stat-icon svg {
+  color: #4ade80 !important;
+}
+
+/* ========================================
+   PAGINATION
+   ======================================== */
+.dark .pagination button {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+.dark .pagination button:hover:not(:disabled) {
+  background-color: #374151 !important;
+}
+
+/* ========================================
+   MODAL
+   ======================================== */
+.dark .modal-content {
+  background-color: #1a1a1a !important;
+  border-color: #2a2a2a !important;
+}
+
+.dark .modal-content * {
+  color: #f3f4f6 !important;
+}
+
+/* ========================================
+   BOUTONS MODERNES
+   ======================================== */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: white;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #15803d, #14532d);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: white;
+  color: #334155;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #f8fafc;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: scale(0.98);
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: scale(0.98);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  color: #475569;
+  font-weight: 500;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+/* Mode sombre pour les boutons */
+.dark .btn-primary {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.dark .btn-primary:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}
+
+.dark .btn-secondary {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .btn-secondary:hover {
+  background-color: #334155;
+}
+
+.dark .btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.dark .btn-ghost {
+  color: #94a3b8;
+}
+
+.dark .btn-ghost:hover {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-20px) translateX(10px); }
+}
+
+@keyframes floatDelay {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(20px) translateX(-10px); }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-float-delay {
+  animation: floatDelay 10s ease-in-out infinite;
+}
+
+.animate-in {
+  animation: slideUp 0.3s ease-out both;
+}
+
+/* ========================================
+   EFFETS DE VERRE (GLASSMORPHISM)
+   ======================================== */
+.hero-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.hero-badge {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-text {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  border-radius: 16px;
+  padding: 2px 8px;
+  display: inline-block;
+}
+
+/* ========================================
+   SCROLLBAR
+   ======================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1a1a1a !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #3a3a3a !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a !important;
+}
+
+/* ========================================
+   SELECTION DE TEXTE
+   ======================================== */
+::selection {
+  background-color: rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
