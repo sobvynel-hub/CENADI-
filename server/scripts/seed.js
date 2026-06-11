@@ -3,7 +3,8 @@
  * Exécution: node scripts/seed.js
  */
 
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+// Charge le .env s'il existe (local), sinon utilise les variables globales de l'environnement (Render)
+require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const path = require('path');
@@ -66,7 +67,7 @@ const formations = [
     slug: 'cybersecurite-bonnes-pratiques',
     description: 'Sensibilisation à la sécurité informatique pour tous les employés',
     objectives: 'Identifier les menaces, adopter les bonnes pratiques, protéger les données sensibles',
-    program: '<h3>Module 1</h3><p>Les risques numériques</p><h3>Module 2</h3><p>Mots de passe et authentification</p><h3>Module 3</h3><p>Phishing et ingénierie sociale</p>',
+    program: '<h3>Module 1</h3><p>Les risks numériques</p><h3>Module 2</h3><p>Mots de passe et authentification</p><h3>Module 3</h3><p>Phishing et ingénierie sociale</p>',
     prerequisites: [],
     trainer: 'Sébastien Kamga',
     trainerBio: 'Expert en sécurité informatique, certifié CISSP',
@@ -139,9 +140,16 @@ const demoUsers = [
 async function seed() {
   console.log('🌱 Début du seed des données initiales...\n');
   
+  // Accepte à la fois MONGO_URI ou MONGODB_URI pour éviter tout problème de nommage
+  const dbUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+
   try {
+    if (!dbUri) {
+      throw new Error("La variable d'environnement de connexion à la base de données (MONGO_URI) est introuvable.");
+    }
+
     // Connexion à MongoDB
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(dbUri);
     console.log('✅ Connecté à MongoDB');
 
     // Nettoyer les collections
@@ -176,7 +184,7 @@ async function seed() {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('👑 Super Admin:   super@cenadi.cm / Admin123456!');
     console.log('🛡️ Admin:         admin@cenadi.cm / Admin123456!');
-    console.log('👤 Personnel:      employe@cenadi.cm / Admin123456!');
+    console.log('👤 Personnel:     employe@cenadi.cm / Admin123456!');
     console.log('👤 Employé DSI:   paul.ndjock@cenadi.cm / Temp123456!');
     console.log('👤 Employé RH:    marie.essomba@cenadi.cm / Temp123456!');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
