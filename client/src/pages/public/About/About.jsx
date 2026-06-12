@@ -35,7 +35,7 @@ export default function About() {
     <div className="max-w-4xl mx-auto px-6 py-12">
       <div className="text-center mb-12">
         <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white mb-4">
-          {about.title || 'À propos de CENADI'}
+          {about.title || 'À propos du CENADI'}
         </h1>
         <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
           {about.description || 'Le Centre National de Développement Informatique (CENADI) est un établissement public camerounais chargé de la conception et de la mise en œuvre de la politique informatique de l\'État.'}

@@ -60,7 +60,7 @@ export default function Formations() {
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white mb-2">Catalogue des formations</h1>
-        <p className="text-slate-500 dark:text-slate-400">Découvrez toutes les formations disponibles chez CENADI</p>
+        <p className="text-slate-500 dark:text-slate-400">Découvrez toutes les formations disponibles chez le CENADI</p>
       </div>
 
       <div className="bg-white dark:bg-dark-surface rounded-2xl border border-slate-100 dark:border-dark-border p-4 mb-6 shadow-card">

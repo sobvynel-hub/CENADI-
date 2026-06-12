@@ -163,7 +163,8 @@ export default function Home() {
               <span className="text-primary-200 dark:text-primary-300">compétences professionnelles</span>
             </h1>
             <p className="text-primary-100 dark:text-white/80 text-lg leading-relaxed mb-8 max-w-xl">
-              CENADI facilite la gestion et le suivi des formations pour tout le personnel.
+              le  Centre National de Développement Informatique (CENADI)
+             facilite la gestion et le suivi des formations pour tout le personnel.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link to="/formations" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary-700 font-bold rounded-xl hover:bg-primary-50 transition-all dark:bg-white/10 dark:text-white dark:backdrop-blur-sm dark:border dark:border-white/20 dark:hover:bg-white/20">
