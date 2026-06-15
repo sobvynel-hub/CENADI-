@@ -169,10 +169,10 @@ export default function Login() {
               Comptes de démonstration :
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Super Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">super@cenadi.cm</code>
+              Super Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">..</code>
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">admin@cenadi.cm</code>
+              Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">..</code>
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Personnel: <code className="text-primary-700 dark:text-primary-400 font-mono">employe@cenadi.cm</code>
