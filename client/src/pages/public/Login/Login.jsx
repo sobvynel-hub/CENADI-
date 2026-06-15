@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
@@ -8,12 +8,24 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/home';
-
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Redirection automatique si déjà connecté
+  useEffect(() => {
+    if (user) {
+      // Vérifier le rôle de l'utilisateur
+      const userRole = user?.role || user?.data?.role;
+      
+      if (userRole === 'admin' || userRole === 'super_admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (userRole === 'user' || !userRole) {
+        navigate('/home', { replace: true });
+      }
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,12 +33,22 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await login(form.email, form.password);
+      // La fonction login retourne probablement les données utilisateur
+      const response = await login(form.email, form.password);
       
-      console.log("✅ Connecté avec succès");
+      console.log("✅ Connecté avec succès", response);
       
-      navigate('/home', { replace: true });
+      // Récupérer le rôle depuis la réponse ou depuis l'utilisateur dans le contexte
+      const userRole = response?.role || response?.user?.role || user?.role;
+      
+      // Rediriger selon le rôle
+      if (userRole === 'admin' || userRole === 'super_admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/home', { replace: true });
+      }
     } catch (err) {
+      console.error("Erreur de connexion:", err);
       setError(err.message || 'Identifiants incorrects');
     } finally {
       setLoading(false);
@@ -159,17 +181,6 @@ export default function Login() {
               Mot de passe: <code className="text-primary-700 dark:text-primary-400 font-mono">Admin123456!</code>
             </p>
           </div>
-
-          {user?.role === 'admin' || user?.role === 'super_admin' ? (
-            <div className="mt-4 text-center">
-              <Link
-                to="/admin/dashboard"
-                className="text-sm text-primary-600 hover:text-primary-700 font-semibold transition-colors"
-              >
-                Accéder à l'espace administrateur →
-              </Link>
-            </div>
-          ) : null}
         </div>
       </div>
     </div>
