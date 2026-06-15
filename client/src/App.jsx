@@ -28,6 +28,7 @@ import Blog from './pages/public/Blog/Blog';
 import BlogPost from './pages/public/Blog/BlogPost';
 // ✅ Page de maintenance (mode lockdown)
 import Maintenance from './pages/public/Maintenance/Maintenance';
+import Maintenance from './pages/public/Maintenance/Maintenance';
 
 // Pages admin
 import Dashboard from './pages/admin/Dashboard/Dashboard';
@@ -154,6 +155,7 @@ export default function App() {
               <Route path="/admin/attendances" element={<AttendancesList />} />
               <Route path="/admin/certificates" element={<CertificatesList />} />
               <Route path="/admin/personal-trainings" element={<PersonalTrainingsList />} />
+              <Route path="/maintenance" element={<Maintenance />} />
 
               {/* Utilisateurs */}
               <Route path="/admin/users" element={<UsersList />} />
