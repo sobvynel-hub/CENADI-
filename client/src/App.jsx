@@ -23,9 +23,11 @@ import NotFound from './pages/public/NotFound/NotFound';
 import Forbidden from './pages/public/Forbidden/Forbidden';
 import ForgotPassword from './pages/public/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/public/ResetPassword/ResetPassword';
-// ✅ NOUVEAU : Pages du blog
+// ✅ Pages du blog
 import Blog from './pages/public/Blog/Blog';
 import BlogPost from './pages/public/Blog/BlogPost';
+// ✅ Page de maintenance (mode lockdown)
+import Maintenance from './pages/public/Maintenance/Maintenance';
 
 // Pages admin
 import Dashboard from './pages/admin/Dashboard/Dashboard';
@@ -43,7 +45,7 @@ import Statistics from './pages/admin/Statistics/Statistics';
 import PersonalTrainingsList from './pages/admin/PersonalTrainings/PersonalTrainingsList';
 import Settings from './pages/admin/Settings/Settings';
 import AdminsList from './pages/admin/Admins/AdminsList';
-// ✅ NOUVEAU : Pages admin du blog
+// ✅ Pages admin du blog
 import BlogManager from './pages/admin/Blog/BlogManager';
 import SuggestionsManager from './pages/admin/Blog/SuggestionsManager';
 
@@ -110,23 +112,32 @@ export default function App() {
             {/* Redirection racine */}
             <Route path="/" element={<Navigate to="/home" replace />} />
 
-            {/* Routes publiques */}
+            {/* ============ ROUTES PUBLIQUES ============ */}
+            {/* Page de maintenance (mode lockdown) - accessible même en lockdown */}
+            <Route path="/maintenance" element={<Maintenance />} />
+            
+            {/* Routes publiques normales */}
             <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
             <Route path="/formations" element={<PublicLayout><Formations /></PublicLayout>} />
             <Route path="/formations/:id" element={<PublicLayout><FormationDetail /></PublicLayout>} />
             <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
             <Route path="/forbidden" element={<PublicLayout><Forbidden /></PublicLayout>} />
-            {/* ✅ NOUVEAU : Routes du blog public */}
+            
+            {/* Routes du blog public */}
             <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
             <Route path="/blog/:slug" element={<PublicLayout><BlogPost /></PublicLayout>} />
+            
+            {/* Routes d'authentification (non wrappées dans PublicLayout pour éviter le footer/navbar) */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+            
+            {/* Route 404 - toujours en dernier */}
+            <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
 
-            {/* Routes admin (protégées) */}
+            {/* ============ ROUTES ADMIN (PROTÉGÉES) ============ */}
             <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="/admin/dashboard" element={<Dashboard />} />
@@ -136,7 +147,6 @@ export default function App() {
               <Route path="/admin/formations/new" element={<FormationForm />} />
               <Route path="/admin/formations/:id" element={<AdminFormationDetail />} />
               <Route path="/admin/expense-memo/:id" element={<ExpenseMemoPage />} />
-              {/* ✅ Route du rapport - UNE SEULE FOIS */}
               <Route path="/admin/reports/formation/:id" element={<FormationReport />} />
 
               {/* Gestion */}
@@ -154,7 +164,7 @@ export default function App() {
               <Route path="/admin/search" element={<GlobalSearch />} />
               <Route path="/admin/statistics" element={<Statistics />} />
 
-              {/* ✅ NOUVEAU : Routes admin du blog */}
+              {/* Routes admin du blog */}
               <Route path="/admin/blog" element={<BlogManager />} />
               <Route path="/admin/suggestions" element={<SuggestionsManager />} />
 
