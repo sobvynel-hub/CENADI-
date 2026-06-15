@@ -8,9 +8,10 @@ const router = express.Router();
 const searchController = require('../controllers/searchController');
 const { protect } = require('../middleware/auth');
 const { restrictTo } = require('../middleware/role');
+const { requirePublicAccess } = require('../middleware/publicAccess');
 
 // Recherche publique (visiteur)
-router.get('/formations/public', searchController.searchPublicFormations);
+router.get('/formations/public', requirePublicAccess, searchController.searchPublicFormations);
 
 // Recherches protégées (admin)
 router.use(protect);

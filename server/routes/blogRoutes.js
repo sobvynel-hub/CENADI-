@@ -9,11 +9,12 @@ const blogController = require('../controllers/blogController');
 const { protect } = require('../middleware/auth');
 const { restrictTo } = require('../middleware/role');
 const { uploadCoverImage } = require('../middleware/upload');
+const { requirePublicAccess } = require('../middleware/publicAccess');
 
 // ============ ROUTES PUBLIQUES ============
-router.get('/', blogController.getPublishedPosts);
-router.get('/stats', blogController.getStats);
-router.get('/:slug', blogController.getPostBySlug);
+router.get('/', requirePublicAccess, blogController.getPublishedPosts);
+router.get('/stats', requirePublicAccess, blogController.getStats);
+router.get('/:slug', requirePublicAccess, blogController.getPostBySlug);
 
 // ============ ROUTES ADMIN (protégées) ============
 router.use(protect);

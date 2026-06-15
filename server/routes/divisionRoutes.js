@@ -7,11 +7,12 @@ const express = require('express');
 const router = express.Router();
 const divisionController = require('../controllers/divisionController');
 const { protect } = require('../middleware/auth');
+const { requirePublicAccess } = require('../middleware/publicAccess');
 const { restrictTo } = require('../middleware/role');  // ← IMPORTANT: vérifiez cette ligne
 
 // Routes publiques (visiteur)
-router.get('/', divisionController.getAllDivisions);
-router.get('/:id', divisionController.getDivisionById);
+router.get('/', requirePublicAccess, divisionController.getAllDivisions);
+router.get('/:id', requirePublicAccess, divisionController.getDivisionById);
 
 // Routes protégées (admin uniquement)
 router.use(protect);

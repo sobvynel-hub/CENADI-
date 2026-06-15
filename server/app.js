@@ -16,6 +16,10 @@ const routes = require('./routes/index');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 
+// ⚠️ IMPORTANT : Import du middleware publicAccess
+const { optionalProtect } = require('./middleware/auth');
+const { requirePublicAccess } = require('./middleware/publicAccess');
+
 const app = express();
 
 // ─── Sécurité ────────────────────────────────────────────────────────────────
@@ -91,10 +95,25 @@ app.use((req, _res, next) => {
   next();
 });
 
+// =============================================================================
+// ⚠️⚠️⚠️ MIDDLEWARES GLOBAUX D'ACCÈS PUBLIC ⚠️⚠️⚠️
+// =============================================================================
+// 1. D'abord, essayer d'extraire l'utilisateur si un token JWT est présent
+//    Cela permet à req.user d'être disponible pour les middlewares suivants
+app.use(optionalProtect);
+
+// 2. Ensuite, vérifier le mode lockdown pour TOUTES les routes API
+//    - Si mode normal (publicAccess.enabled = true) → tout le monde passe
+//    - Si mode lockdown (publicAccess.enabled = false) → seuls les admins passent
+//    - Les routes d'authentification (/api/auth/login, etc.) sont exclues automatiquement
+//      car le middleware requirePublicAccess vérifie les routes exclues
+app.use('/api', requirePublicAccess);
+// =============================================================================
+
 // ─── Routes principales ───────────────────────────────────────────────────────
 app.use('/api', routes);
 
-// Route de santé
+// Route de santé (publique, non bloquée par le lockdown)
 app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'OK',

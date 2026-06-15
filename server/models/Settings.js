@@ -32,6 +32,19 @@ const settingsSchema = new mongoose.Schema(
       name: { type: String, default: 'CENADI Formation' },
       email: { type: String, default: 'contact@cenadi.cm' },
     },
+    publicAccess: {
+      enabled: { type: Boolean, default: true },
+      message: {
+        type: String,
+        default: 'L espace public est temporairement indisponible.',
+      },
+      updatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+      },
+      updatedAt: { type: Date, default: null },
+    },
   },
   { timestamps: true }
 );

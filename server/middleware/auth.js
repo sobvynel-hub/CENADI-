@@ -88,4 +88,38 @@ const protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-module.exports = { protect };
+const optionalProtect = catchAsync(async (req, _res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer ')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  if (!token) {
+    token = getCookieToken(req);
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const currentUser = await User.findById(decoded.id);
+
+    if (currentUser && currentUser.isActive) {
+      if (!currentUser.role || currentUser.role === ROLES.USER) {
+        currentUser.role = ROLES.EMPLOYEE;
+        await currentUser.save({ validateBeforeSave: false });
+      }
+      req.user = currentUser;
+    }
+  } catch (_err) {
+    req.user = undefined;
+  }
+
+  next();
+});
+
+module.exports = { protect, optionalProtect };

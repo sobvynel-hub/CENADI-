@@ -34,17 +34,18 @@ const { protect }          = require('../middleware/auth');
 const { restrictTo }       = require('../middleware/role');
 const { uploadCoverImage } = require('../middleware/upload');
 const { validateFormation } = require('../middleware/validation');
+const { requirePublicAccess } = require('../middleware/publicAccess');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOC 1 — Routes publiques (sans authentification)
 // Segments fixes EN PREMIER, paramètres dynamiques EN DERNIER
 // ─────────────────────────────────────────────────────────────────────────────
-router.get('/upcoming',     formationController.getUpcomingFormations);
-router.get('/past',         formationController.getPastFormations);
-router.get('/slug/:slug',   formationController.getFormationBySlug);
+router.get('/upcoming',     requirePublicAccess, formationController.getUpcomingFormations);
+router.get('/past',         requirePublicAccess, formationController.getPastFormations);
+router.get('/slug/:slug',   requirePublicAccess, formationController.getFormationBySlug);
 
 // Route publique /:id — formations publiées uniquement (visiteurs)
-router.get('/:id',          formationController.getFormationById);
+router.get('/:id',          requirePublicAccess, formationController.getFormationById);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOC 2 — Authentification obligatoire pour tout ce qui suit
