@@ -9,7 +9,15 @@ const { ROLES } = require('../utils/constants');
 const defaultMessage = "L'espace public est temporairement indisponible. Veuillez réessayer plus tard.";
 
 // Routes d'authentification qui doivent toujours être accessibles
-const excludedRoutes = ['/api/auth/login', '/api/auth/register', '/api/auth/forgot-password', '/api/auth/reset-password', '/api/auth/refresh-token'];
+const excludedRoutes = [
+  '/api/auth/login',
+  '/api/auth/register', 
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/refresh-token',
+  '/api/settings/public-access', // ✅ Ajout : permet de vérifier le statut
+  '/health', // ✅ Ajout : route de santé
+];
 
 /**
  * Réponse envoyée quand l'accès public est désactivé
@@ -39,23 +47,34 @@ const isAdminUser = (user) => {
 };
 
 /**
- * Vérifie si une route est exclue du lockdown
+ * Vérifie si une route est exclue du lockdown (exact match ou début de chemin)
  */
 const isExcludedRoute = (path) => {
-  return excludedRoutes.some(route => path.startsWith(route));
+  // Vérification exacte
+  if (excludedRoutes.includes(path)) {
+    return true;
+  }
+  // Vérification si le chemin commence par une route exclue (pour les sous-routes)
+  return excludedRoutes.some(route => path.startsWith(route + '/'));
 };
 
 /**
  * Charge la configuration d'accès public depuis la base
  */
 const loadPublicAccess = async () => {
-  let settings = await Settings.findOne().select('publicAccess');
+  try {
+    let settings = await Settings.findOne().select('publicAccess');
 
-  if (!settings) {
-    settings = await Settings.create({});
+    if (!settings) {
+      settings = await Settings.create({});
+    }
+
+    return settings.publicAccess;
+  } catch (error) {
+    console.error('Erreur loadPublicAccess:', error);
+    // En cas d'erreur, on retourne un état par défaut (accès ouvert)
+    return { enabled: true };
   }
-
-  return settings.publicAccess;
 };
 
 /**
@@ -64,7 +83,7 @@ const loadPublicAccess = async () => {
  */
 const requirePublicAccess = async (req, res, next) => {
   try {
-    // Vérifier si la route est exclue
+    // ✅ Vérifier si la route est exclue (AVANT toute autre vérification)
     if (isExcludedRoute(req.path)) {
       return next();
     }
