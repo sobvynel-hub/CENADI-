@@ -131,7 +131,7 @@ export default function Settings() {
   };
 
   const tabs = [
-    { id: 'public-access', label: '🔒 Accès public', icon: Shield },
+    { id: 'public-access', label: ' Accès public', icon: Shield },
     { id: 'about', label: 'À propos', icon: Eye },
     { id: 'contact', label: 'Contact', icon: MapPin },
     { id: 'footer', label: 'Pied de page', icon: FileText },
@@ -203,7 +203,7 @@ export default function Settings() {
                 <p className={`font-bold text-lg ${
                   isLockdown ? 'text-red-700 dark:text-red-400' : 'text-green-700 dark:text-green-400'
                 }`}>
-                  {isLockdown ? '🔒 MODE LOCKDOWN ACTIF' : '🔓 ACCÈS PUBLIC OUVERT'}
+                  {isLockdown ? ' MODE LOCKDOWN ACTIF' : ' ACCÈS PUBLIC OUVERT'}
                 </p>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
                   {isLockdown 
@@ -250,7 +250,7 @@ export default function Settings() {
                 onClick={() => setShowMessageInput(!showMessageInput)}
                 className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 mb-3"
               >
-                ✏️ {showMessageInput ? 'Annuler' : 'Personnaliser le message'}
+                 {showMessageInput ? 'Annuler' : 'Personnaliser le message'}
               </button>
               
               {showMessageInput && (
@@ -302,7 +302,7 @@ export default function Settings() {
                 ) : (
                   <Lock size={18} />
                 )}
-                {lockdownLoading ? 'Activation...' : '🔒 Activer le mode lockdown (bloquer l\'accès public)'}
+                {lockdownLoading ? 'Activation...' : ' Activer le mode lockdown (bloquer l\'accès public)'}
               </button>
             ) : (
               <button
@@ -326,7 +326,7 @@ export default function Settings() {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-amber-700 dark:text-amber-400">
-                  <p className="font-semibold">⚠️ Attention</p>
+                  <p className="font-semibold"> Attention</p>
                   <p className="mt-1">
                     En mode lockdown, <strong>tous les visiteurs non connectés</strong> seront bloqués 
                     et verront le message ci-dessus. Les administrateurs peuvent toujours accéder à l'application.
