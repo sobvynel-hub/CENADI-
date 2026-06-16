@@ -17,7 +17,8 @@ const api = axios.create({
 // Intercepteur pour ajouter le token JWT à chaque requête
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    // ✅ CORRECTION : Utiliser la même clé que AuthContext
+    const token = localStorage.getItem('cenadi_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -56,9 +57,11 @@ api.interceptors.response.use(
     
     // Gestion des erreurs 401 (non authentifié / session expirée)
     if (error.response?.status === 401) {
-      const token = localStorage.getItem('token');
+      // ✅ CORRECTION : Utiliser la même clé que AuthContext
+      const token = localStorage.getItem('cenadi_token');
       if (token) {
-        localStorage.removeItem('token');
+        localStorage.removeItem('cenadi_token');
+        localStorage.removeItem('cenadi_user');
         toast.error('Session expirée. Veuillez vous reconnecter.');
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';
