@@ -16,12 +16,11 @@ export default function Login() {
   // Redirection automatique si déjà connecté
   useEffect(() => {
     if (user) {
-      // Vérifier le rôle de l'utilisateur
       const userRole = user?.role || user?.data?.role;
       
       if (userRole === 'admin' || userRole === 'super_admin') {
         navigate('/admin/dashboard', { replace: true });
-      } else if (userRole === 'user' || !userRole) {
+      } else {
         navigate('/home', { replace: true });
       }
     }
@@ -33,19 +32,26 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // La fonction login retourne probablement les données utilisateur
       const response = await login(form.email, form.password);
       
       console.log("✅ Connecté avec succès", response);
       
-      // Récupérer le rôle depuis la réponse ou depuis l'utilisateur dans le contexte
+      // Récupérer le rôle depuis la réponse
       const userRole = response?.role || response?.user?.role || user?.role;
       
-      // Rediriger selon le rôle
+      // Récupérer la page d'origine (si l'utilisateur a été redirigé)
+      const from = location.state?.from || '/home';
+      
+      // Rediriger selon le rôle et la page d'origine
       if (userRole === 'admin' || userRole === 'super_admin') {
-        navigate('/admin/dashboard', { replace: true });
+        // Si l'utilisateur venait d'une page admin, y retourner
+        if (from.startsWith('/admin')) {
+          navigate(from, { replace: true });
+        } else {
+          navigate('/admin/dashboard', { replace: true });
+        }
       } else {
-        navigate('/home', { replace: true });
+        navigate(from, { replace: true });
       }
     } catch (err) {
       console.error("Erreur de connexion:", err);
@@ -169,10 +175,10 @@ export default function Login() {
               Comptes de démonstration :
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Super Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">..</code>
+              Super Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">super@cenadi.cm</code>
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">..</code>
+              Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">admin@cenadi.cm</code>
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Personnel: <code className="text-primary-700 dark:text-primary-400 font-mono">employe@cenadi.cm</code>

@@ -26,8 +26,11 @@ import ResetPassword from './pages/public/ResetPassword/ResetPassword';
 // ✅ Pages du blog
 import Blog from './pages/public/Blog/Blog';
 import BlogPost from './pages/public/Blog/BlogPost';
-// ✅ Page de maintenance (mode lockdown) - UN SEUL IMPORT
+// ✅ Page de maintenance (mode lockdown)
 import Maintenance from './pages/public/Maintenance/Maintenance';
+
+// ✅ Guard d'accès public
+import PublicAccessGuard from './middleware/PublicAccessGuard';
 
 // Pages admin
 import Dashboard from './pages/admin/Dashboard/Dashboard';
@@ -72,7 +75,6 @@ export default function App() {
     >
       <ThemeProvider>
         <AuthProvider>
-          {/* Toaster avec support du thème sombre */}
           <Toaster
             position="top-right"
             toastOptions={{
@@ -112,74 +114,77 @@ export default function App() {
             {/* Redirection racine */}
             <Route path="/" element={<Navigate to="/home" replace />} />
 
-            {/* ============ ROUTES PUBLIQUES ============ */}
-            {/* Page de maintenance (mode lockdown) - accessible même en lockdown */}
-            <Route path="/maintenance" element={<Maintenance />} />
-            
-            {/* Routes publiques normales */}
-            <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
-            <Route path="/formations" element={<PublicLayout><Formations /></PublicLayout>} />
-            <Route path="/formations/:id" element={<PublicLayout><FormationDetail /></PublicLayout>} />
-            <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
-            <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-            <Route path="/forbidden" element={<PublicLayout><Forbidden /></PublicLayout>} />
-            
-            {/* Routes du blog public */}
-            <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
-            <Route path="/blog/:slug" element={<PublicLayout><BlogPost /></PublicLayout>} />
-            
-            {/* Routes d'authentification (non wrappées dans PublicLayout pour éviter le footer/navbar) */}
+            {/* ============ ROUTES TOUJOURS ACCESSIBLES (sans guard) ============ */}
+            {/* Routes d'authentification */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             
+            {/* Page de maintenance (mode lockdown) */}
+            <Route path="/maintenance" element={<Maintenance />} />
+
+            {/* ============ ROUTES PROTÉGÉES PAR PublicAccessGuard ============ */}
+            <Route element={<PublicAccessGuard />}>
+              {/* Routes publiques normales */}
+              <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
+              <Route path="/formations" element={<PublicLayout><Formations /></PublicLayout>} />
+              <Route path="/formations/:id" element={<PublicLayout><FormationDetail /></PublicLayout>} />
+              <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+              <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+              <Route path="/forbidden" element={<PublicLayout><Forbidden /></PublicLayout>} />
+              
+              {/* Routes du blog public */}
+              <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
+              <Route path="/blog/:slug" element={<PublicLayout><BlogPost /></PublicLayout>} />
+
+              {/* Routes admin (protégées) */}
+              <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="/admin/dashboard" element={<Dashboard />} />
+
+                {/* Formations */}
+                <Route path="/admin/formations" element={<FormationsList />} />
+                <Route path="/admin/formations/new" element={<FormationForm />} />
+                <Route path="/admin/formations/:id" element={<AdminFormationDetail />} />
+                <Route path="/admin/expense-memo/:id" element={<ExpenseMemoPage />} />
+                <Route path="/admin/reports/formation/:id" element={<FormationReport />} />
+
+                {/* Gestion */}
+                <Route path="/admin/enrollments" element={<EnrollmentsList />} />
+                <Route path="/admin/attendances" element={<AttendancesList />} />
+                <Route path="/admin/certificates" element={<CertificatesList />} />
+                <Route path="/admin/personal-trainings" element={<PersonalTrainingsList />} />
+
+                {/* Utilisateurs */}
+                <Route path="/admin/users" element={<UsersList />} />
+                <Route path="/admin/users/:id" element={<UserDetail />} />
+
+                {/* Divers */}
+                <Route path="/admin/divisions" element={<DivisionsList />} />
+                <Route path="/admin/search" element={<GlobalSearch />} />
+                <Route path="/admin/statistics" element={<Statistics />} />
+
+                {/* Routes admin du blog */}
+                <Route path="/admin/blog" element={<BlogManager />} />
+                <Route path="/admin/suggestions" element={<SuggestionsManager />} />
+
+                {/* Super Admin uniquement */}
+                <Route path="/admin/settings" element={
+                  <AdminRoute superAdminOnly>
+                    <Settings />
+                  </AdminRoute>
+                } />
+                <Route path="/admin/admins" element={
+                  <AdminRoute superAdminOnly>
+                    <AdminsList />
+                  </AdminRoute>
+                } />
+              </Route>
+            </Route>
+
             {/* Route 404 - toujours en dernier */}
             <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
-
-            {/* ============ ROUTES ADMIN (PROTÉGÉES) ============ */}
-            <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
-              <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="/admin/dashboard" element={<Dashboard />} />
-
-              {/* Formations */}
-              <Route path="/admin/formations" element={<FormationsList />} />
-              <Route path="/admin/formations/new" element={<FormationForm />} />
-              <Route path="/admin/formations/:id" element={<AdminFormationDetail />} />
-              <Route path="/admin/expense-memo/:id" element={<ExpenseMemoPage />} />
-              <Route path="/admin/reports/formation/:id" element={<FormationReport />} />
-
-              {/* Gestion */}
-              <Route path="/admin/enrollments" element={<EnrollmentsList />} />
-              <Route path="/admin/attendances" element={<AttendancesList />} />
-              <Route path="/admin/certificates" element={<CertificatesList />} />
-              <Route path="/admin/personal-trainings" element={<PersonalTrainingsList />} />
-
-              {/* Utilisateurs */}
-              <Route path="/admin/users" element={<UsersList />} />
-              <Route path="/admin/users/:id" element={<UserDetail />} />
-
-              {/* Divers */}
-              <Route path="/admin/divisions" element={<DivisionsList />} />
-              <Route path="/admin/search" element={<GlobalSearch />} />
-              <Route path="/admin/statistics" element={<Statistics />} />
-
-              {/* Routes admin du blog */}
-              <Route path="/admin/blog" element={<BlogManager />} />
-              <Route path="/admin/suggestions" element={<SuggestionsManager />} />
-
-              {/* Super Admin uniquement */}
-              <Route path="/admin/settings" element={
-                <AdminRoute superAdminOnly>
-                  <Settings />
-                </AdminRoute>
-              } />
-              <Route path="/admin/admins" element={
-                <AdminRoute superAdminOnly>
-                  <AdminsList />
-                </AdminRoute>
-              } />
-            </Route>
           </Routes>
         </AuthProvider>
       </ThemeProvider>
