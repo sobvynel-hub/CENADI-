@@ -315,7 +315,7 @@ export default function Settings() {
                 ) : (
                   <Unlock size={18} />
                 )}
-                {lockdownLoading ? 'Désactivation...' : '🔓 Désactiver le lockdown (réouvrir l\'accès public)'}
+                {lockdownLoading ? 'Désactivation...' : ' Désactiver le lockdown (réouvrir l\'accès public)'}
               </button>
             )}
           </div>
