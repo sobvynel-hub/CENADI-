@@ -9,14 +9,15 @@ const { ROLES } = require('../utils/constants');
 const defaultMessage = "L'espace public est temporairement indisponible. Veuillez réessayer plus tard.";
 
 // Routes d'authentification qui doivent toujours être accessibles
+// ✅ IMPORTANT : Utiliser des chemins relatifs car le middleware est monté sur '/api'
 const excludedRoutes = [
-  '/api/auth/login',
-  '/api/auth/register', 
-  '/api/auth/forgot-password',
-  '/api/auth/reset-password',
-  '/api/auth/refresh-token',
-  '/api/settings/public-access', // ✅ Ajout : permet de vérifier le statut
-  '/health', // ✅ Ajout : route de santé
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/refresh-token',
+  '/settings/public-access',
+  '/health',
 ];
 
 /**
@@ -47,14 +48,15 @@ const isAdminUser = (user) => {
 };
 
 /**
- * Vérifie si une route est exclue du lockdown (exact match ou début de chemin)
+ * Vérifie si une route est exclue du lockdown
+ * @param {string} path - Le chemin de la requête (relatif à /api)
  */
 const isExcludedRoute = (path) => {
   // Vérification exacte
   if (excludedRoutes.includes(path)) {
     return true;
   }
-  // Vérification si le chemin commence par une route exclue (pour les sous-routes)
+  // Vérification si le chemin commence par une route exclue
   return excludedRoutes.some(route => path.startsWith(route + '/'));
 };
 
@@ -83,7 +85,7 @@ const loadPublicAccess = async () => {
  */
 const requirePublicAccess = async (req, res, next) => {
   try {
-    // ✅ Vérifier si la route est exclue (AVANT toute autre vérification)
+    // ✅ Vérifier si la route est exclue (utiliser req.path qui est relatif à /api)
     if (isExcludedRoute(req.path)) {
       return next();
     }
