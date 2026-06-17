@@ -12,11 +12,11 @@ import { formationsApi } from '../../../api/formations';
 import Loader from '../../../components/common/Loader';
 import Modal from '../../../components/common/Modal';
 
-// ─── Configuration des sections (fusionnées comme dans l'image) ──────────────
+// ─── Configuration des sections ──────────────────────────────────────────────
 const SECTION_CONFIG = {
-  A: { label: 'A', tauxParDefaut: 11, icon: Users, subLabel: 'SUPERVISION' },
-  B: { label: 'B', tauxParDefaut: 24.75, icon: GraduationCap, subLabel: 'FORMATEURS & PRESTATIONS' },
-  C: { label: 'C', tauxParDefaut: 0, icon: Truck, subLabel: 'TRANSPORT / DIVERS' },
+  A: { label: 'A', tauxParDefaut: 11, subLabel: 'A' },
+  B: { label: 'B', tauxParDefaut: 24.75, subLabel: 'B' },
+  C: { label: 'C', tauxParDefaut: 0, subLabel: 'C' },
 };
 
 const SECTION_COLORS = {
@@ -405,12 +405,12 @@ export default function ExpenseMemoPage() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="bg-slate-100 dark:bg-slate-700 border-b">
-                  <th className="px-3 py-3 text-center w-12 font-bold">N°</th>
+                  <th className="px-3 py-3 text-center w-12 font-bold">No</th>
                   <th className="px-3 py-3 text-left font-bold">Désignations</th>
                   <th className="px-3 py-3 text-center w-28 font-bold">Nombres de personnes</th>
                   <th className="px-3 py-3 text-right w-32 font-bold">Prix Unitaires</th>
                   <th className="px-3 py-3 text-right w-36 font-bold">Montants TTC</th>
-                  <th className="px-3 py-3 text-center w-28 font-bold">IRNC</th>
+                  <th className="px-3 py-3 text-center w-28 font-bold">IRNC 11%</th>
                   <th className="px-3 py-3 text-right w-36 font-bold">Montant net à payer</th>
                 </tr>
               </thead>
@@ -424,12 +424,10 @@ export default function ExpenseMemoPage() {
 
                   return (
                     <React.Fragment key={code}>
-                      {/* Ligne d'en-tête de section */}
+                      {/* Ligne d'en-tête de section - A, B ou C */}
                       <tr className={`${SECTION_COLORS[code]} border-t-2`}>
                         <td className="px-3 py-2 text-center font-bold text-base">{code}</td>
-                        <td className="px-3 py-2 font-bold" colSpan="1">
-                          {config.subLabel}
-                        </td>
+                        <td className="px-3 py-2 font-bold" colSpan="1"></td>
                         <td className="px-3 py-2"></td>
                         <td className="px-3 py-2"></td>
                         <td className="px-3 py-2"></td>
@@ -441,15 +439,8 @@ export default function ExpenseMemoPage() {
 
                       {/* Lignes de données */}
                       {lines.map((line, idx) => {
-                        const isFormateurs = line.designation === 'Formateurs';
-                        const isKits = line.designation === 'Kits des participants';
-                        const isLocation = line.designation === 'Location de la salle';
-                        const isRestauration = line.designation === 'Restauration';
-                        const isImprevus = line.designation === 'Imprévus + divers';
-                        const isTransport = line.designation === 'Transport';
                         const isFixedAmountLine = line.isFixedAmount;
-
-                        // Afficher le numéro uniquement pour la première ligne de chaque section
+                        // Afficher la lettre uniquement pour la première ligne de chaque section
                         const showNumber = idx === 0 ? code : '';
 
                         return (
