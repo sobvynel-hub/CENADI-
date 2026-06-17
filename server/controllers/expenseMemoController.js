@@ -4,16 +4,16 @@ const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const XLSX = require('xlsx');
 
-// ─── Données référentielles (fusionnées comme dans l'image) ──────────────────
+// ─── Données référentielles ───────────────────────────────────────────────────
 
 const SECTIONS = {
-  A: { label: 'A - SUPERVISION', defaultTaux: 11 },
-  B: { label: 'B - FORMATEURS & PRESTATIONS', defaultTaux: 24.75 },
-  C: { label: 'C - TRANSPORT / DIVERS', defaultTaux: 0 },
+  A: { label: 'A', defaultTaux: 11 },
+  B: { label: 'B', defaultTaux: 24.75 },
+  C: { label: 'C', defaultTaux: 0 },
 };
 
 const PREDEFINED_LINES = [
-  // Section A - SUPERVISION
+  // Section A
   { code: 'A', designation: 'Supervision générale', defaultNombre: 1, defaultPrix: 1000000, isFixedAmount: false },
   { code: 'A', designation: 'Supervision technique', defaultNombre: 1, defaultPrix: 1000000, isFixedAmount: false },
   { code: 'A', designation: 'Coordination générale', defaultNombre: 1, defaultPrix: 500000, isFixedAmount: false },
@@ -26,13 +26,13 @@ const PREDEFINED_LINES = [
   { code: 'A', designation: 'Secrétaire général permanent', defaultNombre: 1, defaultPrix: 100000, isFixedAmount: false },
   { code: 'A', designation: 'Chef Service Financier', defaultNombre: 1, defaultPrix: 100000, isFixedAmount: false },
   { code: 'A', designation: 'Formateurs', defaultNombre: 5, defaultPrix: 0, isFixedAmount: true, defaultFixedAmount: 10000000 },
-
-  // Section B - FORMATEURS & PRESTATIONS
+  
+  // Section B
   { code: 'B', designation: 'Kits des participants', defaultNombre: 15, defaultPrix: 0, isFixedAmount: true, defaultFixedAmount: 2000000 },
   { code: 'B', designation: 'Location de la salle', defaultNombre: 0, defaultPrix: 0, isFixedAmount: true, defaultFixedAmount: 4000000 },
   { code: 'B', designation: 'Restauration', defaultNombre: 15, defaultPrix: 0, isFixedAmount: true, defaultFixedAmount: 1000000 },
-
-  // Section C - TRANSPORT / DIVERS
+  
+  // Section C
   { code: 'C', designation: 'Transport', defaultNombre: 10, defaultPrix: 200000, isFixedAmount: false },
   { code: 'C', designation: 'Imprévus + divers', defaultNombre: 0, defaultPrix: 0, isFixedAmount: true, defaultFixedAmount: 350000 },
 ];
@@ -329,21 +329,20 @@ exports.exportToExcel = catchAsync(async (req, res, next) => {
   rows.push([]);
 
   rows.push([
-    'N°', 'Désignations', 'Nombres de personnes',
-    'Prix Unitaires (FCFA)', 'Montants TTC (FCFA)',
-    'Taux IRNC (%)', 'IRNC (FCFA)', 'Net à payer (FCFA)',
+    'No', 'Désignations', 'Nombres de personnes',
+    'Prix Unitaires', 'Montants TTC',
+    'IRNC 11%', 'Montant net à payer',
   ]);
 
   let currentCode = null;
   for (const line of memo.lines) {
     if (line.code !== currentCode) {
       currentCode = line.code;
-      const sectionLabel = SECTIONS[line.code]?.label || line.code;
       const tauxLabel = line.code === 'A' ? '11%' : line.code === 'B' ? '19,25% + 5,5%' : '';
       rows.push([
         line.code,
-        sectionLabel,
-        '', '', '', tauxLabel, '', '',
+        '',
+        '', '', '', tauxLabel, '',
       ]);
     }
     rows.push([
@@ -352,26 +351,24 @@ exports.exportToExcel = catchAsync(async (req, res, next) => {
       line.isFixedAmount ? '' : (line.nombre ?? ''),
       line.isFixedAmount ? '/' : (line.prixUnitaire ?? ''),
       line.montantTTC ?? 0,
-      `${line.tauxIRNC ?? 0}%`,
-      line.irnc ?? 0,
+      line.tauxIRNC === 0 ? 'Aucune' : `${line.tauxIRNC ?? 0}%`,
       line.montantNet ?? 0,
     ]);
   }
 
   rows.push([]);
   rows.push([
-    '', 'MONTANT TOTAL GÉNÉRAL', '', '',
+    '', 'MONTANT TOTAL TTC', '', '',
     memo.totals.montantTotalTTC ?? 0,
     '',
-    memo.totals.montantTotalIRNC ?? 0,
     memo.totals.montantTotalNet ?? 0,
   ]);
 
   const ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [
-    { wch: 6 }, { wch: 45 }, { wch: 22 },
-    { wch: 22 }, { wch: 22 }, { wch: 14 },
-    { wch: 20 }, { wch: 22 },
+    { wch: 6 }, { wch: 40 }, { wch: 22 },
+    { wch: 22 }, { wch: 22 }, { wch: 18 },
+    { wch: 22 },
   ];
 
   XLSX.utils.book_append_sheet(wb, ws, 'Memoire Depenses');
@@ -410,33 +407,28 @@ exports.exportToPDF = catchAsync(async (req, res, next) => {
 
   let tableRows = '';
   let currentCode = '';
-  let rowNumber = 0;
 
   for (const line of memo.lines) {
     if (line.code !== currentCode) {
       currentCode = line.code;
-      const sectionLabel = SECTIONS[line.code]?.label || line.code;
       const tauxLabel = line.code === 'A' ? '11%' : line.code === 'B' ? '19,25% + 5,5%' : '';
-      rowNumber = 0;
       tableRows += `
         <tr class="section-header">
-          <td colspan="8"><strong>${line.code}</strong> &nbsp;${sectionLabel} &nbsp;(${tauxLabel})</td>
+          <td><strong>${line.code}</strong></td>
+          <td colspan="6">${tauxLabel}</td>
         </tr>`;
     }
 
-    rowNumber++;
-    const showNumber = rowNumber === 1 ? line.code : '';
     const prixCell = line.isFixedAmount ? '/' : (line.prixUnitaire ? fmt(line.prixUnitaire) : '-');
 
     tableRows += `
       <tr>
-        <td class="text-center">${showNumber}</td>
+        <td class="text-center"></td>
         <td>${line.designation}</td>
         <td class="text-center">${line.isFixedAmount ? '' : (line.nombre ?? '-')}</td>
         <td class="text-right">${prixCell}</td>
         <td class="text-right">${fmt(line.montantTTC)}</td>
         <td class="text-center">${line.tauxIRNC === 0 ? 'Aucune' : `${line.tauxIRNC}%`}</td>
-        <td class="text-right">${fmt(line.irnc)}</td>
         <td class="text-right">${fmt(line.montantNet)}</td>
       </tr>`;
   }
@@ -452,7 +444,7 @@ exports.exportToPDF = catchAsync(async (req, res, next) => {
     * { box-sizing: border-box; }
     body {
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 11px;
+      font-size: 10px;
       margin: 0;
       padding: 0;
       color: #1a1a1a;
@@ -463,62 +455,25 @@ exports.exportToPDF = catchAsync(async (req, res, next) => {
       border-bottom: 2px solid #1e3a5f;
       padding-bottom: 12px;
     }
-    .header .country { font-size: 14px; font-weight: bold; color: #1e3a5f; letter-spacing: 1px; }
-    .header .motto   { font-size: 11px; color: #555; font-style: italic; margin: 2px 0 6px; }
-    .header .ministry { font-size: 13px; font-weight: bold; color: #1e3a5f; }
-    .header .entity  { font-size: 12px; color: #333; margin: 3px 0; }
-    .header .doc-title {
-      font-size: 15px; font-weight: bold;
-      margin: 12px 0 4px;
-      text-transform: uppercase;
-      text-decoration: underline;
-    }
-    .header .formation-title { font-size: 12px; color: #333; font-style: italic; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 10px;
-    }
-    th, td {
-      border: 1px solid #333;
-      padding: 5px 7px;
-      vertical-align: middle;
-    }
-    thead th {
-      background-color: #1e3a5f;
-      color: #fff;
-      font-size: 10px;
-      text-align: center;
-      font-weight: bold;
-    }
-    .text-right  { text-align: right; }
+    .header .country { font-size: 13px; font-weight: bold; color: #1e3a5f; }
+    .header .motto { font-size: 10px; color: #555; font-style: italic; margin: 2px 0 6px; }
+    .header .ministry { font-size: 12px; font-weight: bold; color: #1e3a5f; }
+    .header .entity { font-size: 11px; color: #333; margin: 3px 0; }
+    .header .doc-title { font-size: 14px; font-weight: bold; margin: 12px 0 4px; text-transform: uppercase; text-decoration: underline; }
+    .header .formation-title { font-size: 11px; color: #333; font-style: italic; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 9px; }
+    th, td { border: 1px solid #333; padding: 4px 6px; vertical-align: middle; }
+    thead th { background-color: #1e3a5f; color: #fff; text-align: center; font-weight: bold; }
+    .text-right { text-align: right; }
     .text-center { text-align: center; }
-    .section-header td {
-      background-color: #d4e6f1;
-      font-weight: bold;
-      font-size: 10px;
-      padding: 4px 7px;
-    }
-    .total-row td {
-      background-color: #1e3a5f;
-      color: #fff;
-      font-weight: bold;
-      font-size: 11px;
-    }
-    .footer {
-      margin-top: 30px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 10px;
-    }
+    .section-header td { background-color: #d4e6f1; font-weight: bold; padding: 3px 6px; }
+    .total-row td { background-color: #1e3a5f; color: #fff; font-weight: bold; font-size: 10px; }
+    .footer { margin-top: 30px; display: flex; justify-content: space-between; font-size: 9px; }
     .footer .signatures { display: flex; gap: 80px; }
-    .footer .sig-block  { text-align: center; }
+    .footer .sig-block { text-align: center; }
     .footer .sig-block p { margin: 4px 0; }
-    .footer .sig-line   { border-top: 1px solid #333; margin-top: 40px; width: 150px; }
-    @media print {
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
+    .footer .sig-line { border-top: 1px solid #333; margin-top: 40px; width: 150px; }
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
   </style>
 </head>
 <body>
@@ -535,41 +490,31 @@ exports.exportToPDF = catchAsync(async (req, res, next) => {
   <table>
     <thead>
       <tr>
-        <th style="width:4%">N°</th>
-        <th style="width:32%">DÉSIGNATIONS</th>
-        <th style="width:9%">NOMBRES</th>
-        <th style="width:13%">PRIX UNITAIRE (FCFA)</th>
-        <th style="width:13%">MONTANT TTC (FCFA)</th>
-        <th style="width:8%">TAUX IRNC</th>
-        <th style="width:11%">IRNC (FCFA)</th>
-        <th style="width:10%">NET À PAYER (FCFA)</th>
+        <th style="width:4%">No</th>
+        <th style="width:32%">Désignations</th>
+        <th style="width:11%">Nombres de personnes</th>
+        <th style="width:13%">Prix Unitaires</th>
+        <th style="width:13%">Montants TTC</th>
+        <th style="width:10%">IRNC 11%</th>
+        <th style="width:17%">Montant net à payer</th>
       </tr>
     </thead>
     <tbody>
       ${tableRows}
       <tr class="total-row">
-        <td colspan="4" class="text-right">TOTAL GÉNÉRAL</td>
-        <td class="text-right">${fmt(memo.totals.montantTotalTTC)} FCFA</td>
+        <td colspan="4" class="text-right">MONTANT TOTAL TTC</td>
+        <td class="text-right">${fmt(memo.totals.montantTotalTTC)}</td>
         <td></td>
-        <td class="text-right">${fmt(memo.totals.montantTotalIRNC)} FCFA</td>
-        <td class="text-right">${fmt(memo.totals.montantTotalNet)} FCFA</td>
+        <td class="text-right">${fmt(memo.totals.montantTotalNet)}</td>
       </tr>
     </tbody>
   </table>
 
   <div class="footer">
-    <div>
-      <p>Fait à Yaoundé, le ${dateExport}</p>
-    </div>
+    <div><p>Fait à Yaoundé, le ${dateExport}</p></div>
     <div class="signatures">
-      <div class="sig-block">
-        <p><strong>Le Responsable Financier</strong></p>
-        <div class="sig-line"></div>
-      </div>
-      <div class="sig-block">
-        <p><strong>Le Directeur Général</strong></p>
-        <div class="sig-line"></div>
-      </div>
+      <div class="sig-block"><p><strong>Le Responsable Financier</strong></p><div class="sig-line"></div></div>
+      <div class="sig-block"><p><strong>Le Directeur Général</strong></p><div class="sig-line"></div></div>
     </div>
   </div>
 
