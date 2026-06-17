@@ -1,4 +1,3 @@
-// client/src/pages/admin/ExpenseMemo/ExpenseMemoPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
@@ -13,28 +12,21 @@ import { formationsApi } from '../../../api/formations';
 import Loader from '../../../components/common/Loader';
 import Modal from '../../../components/common/Modal';
 
-// ─── Configuration des sections ──────────────────────────────────────────────
+// ─── Configuration des sections (fusionnées comme dans l'image) ──────────────
 const SECTION_CONFIG = {
-  A: { label: 'A - SUPERVISION',              tauxParDefaut: 11,    icon: Users       },
-  B: { label: 'B - COORDINATION',             tauxParDefaut: 11,    icon: Users       },
-  C: { label: 'C - SECRÉTARIAT',              tauxParDefaut: 11,    icon: Package     },
-  D: { label: 'D - DRH',                      tauxParDefaut: 11,    icon: Users       },
-  E: { label: 'E - TRANSPORT',                tauxParDefaut: 11,    icon: Truck       },
-  F: { label: 'F - FORMATEURS & PRESTATIONS', tauxParDefaut: 24.75, icon: GraduationCap },
+  A: { label: 'A', tauxParDefaut: 11, icon: Users, subLabel: 'SUPERVISION' },
+  B: { label: 'B', tauxParDefaut: 24.75, icon: GraduationCap, subLabel: 'FORMATEURS & PRESTATIONS' },
+  C: { label: 'C', tauxParDefaut: 0, icon: Truck, subLabel: 'TRANSPORT / DIVERS' },
 };
 
 const SECTION_COLORS = {
   A: 'bg-blue-50   border-blue-200   dark:bg-blue-900/20   dark:border-blue-800',
-  B: 'bg-green-50  border-green-200  dark:bg-green-900/20  dark:border-green-800',
-  C: 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800',
-  D: 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800',
-  E: 'bg-cyan-50   border-cyan-200   dark:bg-cyan-900/20   dark:border-cyan-800',
-  F: 'bg-red-50    border-red-200    dark:bg-red-900/20    dark:border-red-800',
+  B: 'bg-red-50    border-red-200    dark:bg-red-900/20    dark:border-red-800',
+  C: 'bg-cyan-50   border-cyan-200   dark:bg-cyan-900/20   dark:border-cyan-800',
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/** Déclenche le téléchargement d'un Blob dans le navigateur. */
 const triggerBlobDownload = (blob, filename) => {
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -49,17 +41,19 @@ const triggerBlobDownload = (blob, filename) => {
 // ─── Composant ───────────────────────────────────────────────────────────────
 export default function ExpenseMemoPage() {
   const { id } = useParams();
-  const [memo,       setMemo]       = useState(null);
-  const [formation,  setFormation]  = useState(null);
-  const [loading,    setLoading]    = useState(true);
-  const [importing,  setImporting]  = useState(false);
+  const [memo, setMemo] = useState(null);
+  const [formation, setFormation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
-  const [validationComment,   setValidationComment]   = useState('');
-  const [validationAction,    setValidationAction]    = useState('');
+  const [validationComment, setValidationComment] = useState('');
+  const [validationAction, setValidationAction] = useState('');
   const [localLines, setLocalLines] = useState([]);
-  const [error,      setError]      = useState(null);
-  const [totals,     setTotals]     = useState({
-    montantTotalTTC: 0, montantTotalIRNC: 0, montantTotalNet: 0,
+  const [error, setError] = useState(null);
+  const [totals, setTotals] = useState({
+    montantTotalTTC: 0,
+    montantTotalIRNC: 0,
+    montantTotalNet: 0,
   });
 
   useEffect(() => { loadData(); }, [id]);
@@ -71,12 +65,12 @@ export default function ExpenseMemoPage() {
       const montantTTC = line.isFixedAmount
         ? (line.fixedAmount || 0)
         : (line.nombre || 0) * (line.prixUnitaire || 0);
-      const taux      = line.tauxIRNC ?? SECTION_CONFIG[line.code]?.tauxParDefaut ?? 11;
-      const irnc      = montantTTC * (taux / 100);
+      const taux = line.tauxIRNC ?? SECTION_CONFIG[line.code]?.tauxParDefaut ?? 0;
+      const irnc = montantTTC * (taux / 100);
       const montantNet = montantTTC - irnc;
-      totalTTC  += montantTTC;
+      totalTTC += montantTTC;
       totalIRNC += irnc;
-      totalNet  += montantNet;
+      totalNet += montantNet;
       return { ...line, montantTTC, irnc, montantNet };
     });
     return {
@@ -90,22 +84,19 @@ export default function ExpenseMemoPage() {
     try {
       setLoading(true);
       setError(null);
-      
-      // ✅ FIX: Utilisation de getByIdAdmin au lieu de getById
-      // getById → route publique → retourne 404 si isPublic=false
-      // getByIdAdmin → route admin → retourne toujours la formation
+
       const [memoRes, formationRes] = await Promise.all([
         expenseMemoApi.getByFormation(id),
         formationsApi.getByIdAdmin(id),
       ]);
-      
+
       const formationData = formationRes?.data?.data ?? formationRes?.data ?? formationRes;
       if (!formationData?._id) {
         throw new Error('Formation non trouvée');
       }
-      
+
       setFormation(formationData);
-      
+
       const lines = memoRes?.data?.lines || [];
       const { updatedLines, totals: newTotals } = calculateTotals(lines);
       setLocalLines(updatedLines);
@@ -223,7 +214,7 @@ export default function ExpenseMemoPage() {
     }
   };
 
-  // ── Export PDF (HTML imprimable) ─────────────────────────────────────────
+  // ── Export PDF ─────────────────────────────────────────────────────────
   const handleExportPDF = async () => {
     const toastId = 'export-pdf';
     toast.loading('Génération du document PDF…', { id: toastId });
@@ -242,7 +233,10 @@ export default function ExpenseMemoPage() {
         const filename = `memoire_depenses_${formation?.title || 'formation'}_${new Date().toISOString().split('T')[0]}.html`;
         triggerBlobDownload(blob, filename);
       }
-      toast.success('Document PDF ouvert – utilisez Ctrl+P pour imprimer/sauvegarder en PDF', { id: toastId, duration: 5000 });
+      toast.success('Document PDF ouvert – utilisez Ctrl+P pour imprimer/sauvegarder en PDF', {
+        id: toastId,
+        duration: 5000,
+      });
     } catch (error) {
       console.error('Export PDF:', error);
       toast.error("Erreur lors de l'export PDF", { id: toastId });
@@ -251,9 +245,8 @@ export default function ExpenseMemoPage() {
 
   // ─── Rendu ────────────────────────────────────────────────────────────────
   const isEditable = memo?.status === 'draft';
-  const isAdmin    = true;
+  const isAdmin = true;
 
-  // Affichage de l'erreur
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
@@ -278,7 +271,6 @@ export default function ExpenseMemoPage() {
 
   if (loading) return <Loader />;
 
-  // Grouper les lignes par section
   const linesBySection = {};
   localLines.forEach((line) => {
     if (!linesBySection[line.code]) linesBySection[line.code] = [];
@@ -286,10 +278,19 @@ export default function ExpenseMemoPage() {
   });
 
   const statusLabel = {
-    draft:     'Brouillon',
+    draft: 'Brouillon',
     submitted: 'Soumis',
-    approved:  'Approuvé',
-    rejected:  'Rejeté',
+    approved: 'Approuvé',
+    rejected: 'Rejeté',
+  };
+
+  const getTauxLabel = (code) => {
+    switch(code) {
+      case 'A': return '11%';
+      case 'B': return '19,25 % + 5,5 %';
+      case 'C': return '';
+      default: return '';
+    }
   };
 
   return (
@@ -307,7 +308,6 @@ export default function ExpenseMemoPage() {
             </Link>
             <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Mémoire de dépenses</h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1">{formation?.title}</p>
-            {/* Indicateur si la formation n'est pas publiée */}
             {formation && !formation.isPublic && (
               <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs">
                 <AlertCircle size={12} /> Formation non publiée (visible uniquement par les admins)
@@ -368,9 +368,9 @@ export default function ExpenseMemoPage() {
             memo?.status === 'rejected'  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
             'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
           }`}>
-            {memo?.status === 'approved'  && <CheckCircle size={14} />}
-            {memo?.status === 'submitted' && <LoaderIcon  size={14} className="animate-spin" />}
-            {memo?.status === 'rejected'  && <XCircle    size={14} />}
+            {memo?.status === 'approved' && <CheckCircle size={14} />}
+            {memo?.status === 'submitted' && <LoaderIcon size={14} className="animate-spin" />}
+            {memo?.status === 'rejected' && <XCircle size={14} />}
             Statut : {statusLabel[memo?.status] || memo?.status}
           </span>
           {memo?.validationComment && (
@@ -383,9 +383,9 @@ export default function ExpenseMemoPage() {
         {/* ── Cartes récapitulatives ───────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {[
-            { label: 'TOTAL TTC',    value: totals.montantTotalTTC,   color: 'text-primary-600' },
-            { label: 'TOTAL IRNC',   value: totals.montantTotalIRNC,  color: 'text-orange-600'  },
-            { label: 'NET À PAYER',  value: totals.montantTotalNet,   color: 'text-green-600'   },
+            { label: 'TOTAL TTC', value: totals.montantTotalTTC, color: 'text-primary-600' },
+            { label: 'TOTAL IRNC', value: totals.montantTotalIRNC, color: 'text-orange-600' },
+            { label: 'NET À PAYER', value: totals.montantTotalNet, color: 'text-green-600' },
           ].map(({ label, value, color }) => (
             <div key={label} className="bg-white dark:bg-slate-800 rounded-xl border p-5 shadow-sm">
               <div className="flex items-center gap-2 text-slate-500 mb-2">
@@ -399,122 +399,136 @@ export default function ExpenseMemoPage() {
           ))}
         </div>
 
-        {/* ── Tableau principal ────────────────────────────────────────── */}
+        {/* ── TABLEAU PRINCIPAL ────────────────────────────────────────── */}
         <div className="bg-white dark:bg-slate-800 rounded-xl border overflow-hidden shadow-lg">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="bg-slate-100 dark:bg-slate-700 border-b">
-                  <th className="px-4 py-3 text-center w-16   text-sm font-bold">N°</th>
-                  <th className="px-4 py-3 text-left          text-sm font-bold">DÉSIGNATIONS</th>
-                  <th className="px-4 py-3 text-center w-36   text-sm font-bold">NOMBRES</th>
-                  <th className="px-4 py-3 text-right  w-40   text-sm font-bold">PRIX UNITAIRE (FCFA)</th>
-                  <th className="px-4 py-3 text-right  w-44   text-sm font-bold">MONTANT TTC (FCFA)</th>
-                  <th className="px-4 py-3 text-right  w-24   text-sm font-bold">TAUX IRNC (%)</th>
-                  <th className="px-4 py-3 text-right  w-44   text-sm font-bold">IRNC (FCFA)</th>
-                  <th className="px-4 py-3 text-right  w-48   text-sm font-bold">NET À PAYER (FCFA)</th>
+                  <th className="px-3 py-3 text-center w-12 font-bold">N°</th>
+                  <th className="px-3 py-3 text-left font-bold">Désignations</th>
+                  <th className="px-3 py-3 text-center w-28 font-bold">Nombres de personnes</th>
+                  <th className="px-3 py-3 text-right w-32 font-bold">Prix Unitaires</th>
+                  <th className="px-3 py-3 text-right w-36 font-bold">Montants TTC</th>
+                  <th className="px-3 py-3 text-center w-28 font-bold">IRNC</th>
+                  <th className="px-3 py-3 text-right w-36 font-bold">Montant net à payer</th>
                 </tr>
               </thead>
               <tbody>
                 {Object.entries(SECTION_CONFIG).map(([code, config]) => {
                   const lines = linesBySection[code] || [];
-                  const Icon  = config.icon;
                   if (lines.length === 0) return null;
-                  
-                  const isSectionFEditable = (code === 'F') ? true : isEditable;
-                  
+
+                  const tauxLabel = getTauxLabel(code);
+                  const isSectionEditable = isEditable;
+
                   return (
                     <React.Fragment key={code}>
+                      {/* Ligne d'en-tête de section */}
                       <tr className={`${SECTION_COLORS[code]} border-t-2`}>
-                        <td colSpan="8" className="px-4 py-3 font-bold">
-                          <div className="flex items-center gap-2">
-                            <Icon size={18} />
-                            {config.label}
-                            <span className="text-xs font-normal ml-2">
-                              (IRNC {config.tauxParDefaut} %)
-                            </span>
-                          </div>
+                        <td className="px-3 py-2 text-center font-bold text-base">{code}</td>
+                        <td className="px-3 py-2 font-bold" colSpan="1">
+                          {config.subLabel}
                         </td>
-                       </tr>
-                      {lines.map((line, idx) => (
-                        <tr key={line._id} className="border-b hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                          <td className="px-4 py-3 text-center text-sm">{idx + 1}</td>
-                          <td className="px-4 py-3 font-medium">{line.designation}</td>
-                          <td className="px-4 py-3 text-center">
-                            {isSectionFEditable ? (
-                              <input
-                                type="number"
-                                value={line.nombre ?? 0}
-                                onChange={(e) => updateLine(line._id, 'nombre', parseInt(e.target.value, 10) || 0)}
-                                className="w-20 px-2 py-1 text-center border rounded-lg dark:bg-slate-700"
-                                min="0"
-                              />
-                            ) : (
-                              <span>{line.nombre ?? '-'}</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            {isSectionFEditable ? (
-                              <input
-                                type="number"
-                                value={line.prixUnitaire ?? 0}
-                                onChange={(e) => updateLine(line._id, 'prixUnitaire', parseInt(e.target.value, 10) || 0)}
-                                className="w-32 px-2 py-1 text-right border rounded-lg dark:bg-slate-700"
-                                min="0"
-                              />
-                            ) : line.isFixedAmount ? (
-                              <span className="text-slate-400">/</span>
-                            ) : (
-                              <span>{line.prixUnitaire ? line.prixUnitaire.toLocaleString('fr-FR') : '-'}</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-right font-medium text-primary-600">
-                            {(line.montantTTC ?? 0).toLocaleString('fr-FR')}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            {isSectionFEditable ? (
-                              <input
-                                type="number"
-                                value={line.tauxIRNC ?? config.tauxParDefaut}
-                                onChange={(e) => updateLine(line._id, 'tauxIRNC', parseFloat(e.target.value) || 0)}
-                                className="w-16 px-2 py-1 text-right border rounded-lg dark:bg-slate-700"
-                                step="0.01"
-                              />
-                            ) : (
-                              <span>{line.tauxIRNC ?? config.tauxParDefaut} %</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-right text-orange-600">
-                            {(line.irnc ?? 0).toLocaleString('fr-FR')}
-                          </td>
-                          <td className="px-4 py-3 text-right font-bold text-green-600">
-                            {(line.montantNet ?? 0).toLocaleString('fr-FR')}
-                          </td>
-                        </tr>
-                      ))}
+                        <td className="px-3 py-2"></td>
+                        <td className="px-3 py-2"></td>
+                        <td className="px-3 py-2"></td>
+                        <td className="px-3 py-2 text-center font-bold">
+                          {tauxLabel}
+                        </td>
+                        <td className="px-3 py-2"></td>
+                      </tr>
+
+                      {/* Lignes de données */}
+                      {lines.map((line, idx) => {
+                        const isFormateurs = line.designation === 'Formateurs';
+                        const isKits = line.designation === 'Kits des participants';
+                        const isLocation = line.designation === 'Location de la salle';
+                        const isRestauration = line.designation === 'Restauration';
+                        const isImprevus = line.designation === 'Imprévus + divers';
+                        const isTransport = line.designation === 'Transport';
+                        const isFixedAmountLine = line.isFixedAmount;
+
+                        // Afficher le numéro uniquement pour la première ligne de chaque section
+                        const showNumber = idx === 0 ? code : '';
+
+                        return (
+                          <tr key={line._id} className="border-b hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                            <td className="px-3 py-2.5 text-center">{showNumber}</td>
+                            <td className="px-3 py-2.5 font-medium">{line.designation}</td>
+                            <td className="px-3 py-2.5 text-center">
+                              {isSectionEditable ? (
+                                <input
+                                  type="number"
+                                  value={line.nombre ?? 0}
+                                  onChange={(e) => updateLine(line._id, 'nombre', parseInt(e.target.value, 10) || 0)}
+                                  className="w-16 px-2 py-1 text-center border rounded-lg dark:bg-slate-700"
+                                  min="0"
+                                />
+                              ) : (
+                                <span>{line.nombre ?? (line.isFixedAmount ? '/' : '-')}</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2.5 text-right">
+                              {isSectionEditable && !isFixedAmountLine ? (
+                                <input
+                                  type="number"
+                                  value={line.prixUnitaire ?? 0}
+                                  onChange={(e) => updateLine(line._id, 'prixUnitaire', parseInt(e.target.value, 10) || 0)}
+                                  className="w-28 px-2 py-1 text-right border rounded-lg dark:bg-slate-700"
+                                  min="0"
+                                />
+                              ) : (
+                                <span>{line.isFixedAmount ? '/' : (line.prixUnitaire ? line.prixUnitaire.toLocaleString('fr-FR') : '-')}</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2.5 text-right font-medium text-primary-600">
+                              {(line.montantTTC ?? 0).toLocaleString('fr-FR')}
+                            </td>
+                            <td className="px-3 py-2.5 text-center">
+                              {isSectionEditable ? (
+                                <input
+                                  type="number"
+                                  value={line.tauxIRNC ?? config.tauxParDefaut}
+                                  onChange={(e) => updateLine(line._id, 'tauxIRNC', parseFloat(e.target.value) || 0)}
+                                  className="w-16 px-2 py-1 text-center border rounded-lg dark:bg-slate-700"
+                                  step="0.01"
+                                />
+                              ) : (
+                                <span>
+                                  {line.tauxIRNC === 0 ? 'Aucune' : `${line.tauxIRNC ?? config.tauxParDefaut}%`}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2.5 text-right font-bold text-green-600">
+                              {(line.montantNet ?? 0).toLocaleString('fr-FR')}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </React.Fragment>
                   );
                 })}
 
-                <tr className="bg-primary-50 dark:bg-primary-900/30 font-bold border-t-2">
-                  <td colSpan="4" className="px-4 py-4 text-right">MONTANT TOTAL</td>
-                  <td className="px-4 py-4 text-right text-primary-700">
-                    {totals.montantTotalTTC.toLocaleString('fr-FR')} FCFA
-                   </td>
-                  <td className="px-4 py-4 text-right"></td>
-                  <td className="px-4 py-4 text-right text-orange-700">
-                    {totals.montantTotalIRNC.toLocaleString('fr-FR')} FCFA
-                   </td>
-                  <td className="px-4 py-4 text-right text-green-700">
-                    {totals.montantTotalNet.toLocaleString('fr-FR')} FCFA
-                   </td>
-                 </tr>
+                {/* Ligne de total */}
+                <tr className="bg-primary-50 dark:bg-primary-900/30 font-bold border-t-2 border-primary-300 dark:border-primary-700">
+                  <td colSpan="4" className="px-3 py-3 text-right text-base">
+                    MONTANT TOTAL TTC
+                  </td>
+                  <td className="px-3 py-3 text-right text-primary-700 text-base">
+                    {totals.montantTotalTTC.toLocaleString('fr-FR')}
+                  </td>
+                  <td className="px-3 py-3 text-center"></td>
+                  <td className="px-3 py-3 text-right text-green-700 text-base">
+                    {totals.montantTotalNet.toLocaleString('fr-FR')}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* ── Pied de page informatif ──────────────────────────────────── */}
+        {/* ── Pied de page ──────────────────────────────────────────────── */}
         <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-center">
           <p className="text-sm">
             💡 Les montants sont calculés automatiquement. Modifiez les nombres, prix unitaires
