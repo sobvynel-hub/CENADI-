@@ -170,23 +170,7 @@ export default function Login() {
             </p>
           </div>
 
-          <div className="mt-6 p-3.5 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600">
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mb-1.5">
-              Comptes de démonstration :
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Super Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">super@cenadi.cm</code>
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Admin: <code className="text-primary-700 dark:text-primary-400 font-mono">admin@cenadi.cm</code>
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Personnel: <code className="text-primary-700 dark:text-primary-400 font-mono">employe@cenadi.cm</code>
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Mot de passe: <code className="text-primary-700 dark:text-primary-400 font-mono">Admin123456!</code>
-            </p>
-          </div>
+        
         </div>
       </div>
     </div>
