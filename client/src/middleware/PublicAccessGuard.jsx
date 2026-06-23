@@ -2,17 +2,16 @@
  * middleware/PublicAccessGuard.jsx
  * Vérifie le statut de l'accès public et gère les redirections
  * 
- * LOGIQUE SIMPLIFIÉE :
+ * LOGIQUE :
  * 
  * 1. Si utilisateur EST authentifié (connecté) :
  *    - Admin / Super Admin → /admin/dashboard
  *    - Personnel / Visiteur → /home
  * 
  * 2. Si utilisateur N'EST PAS authentifié (non connecté) :
- *    - On vérifie le rôle mémorisé (cenadi_role)
- *    - Si c'est un admin → /login (doit se réauthentifier)
- *    - Si c'est un personnel/visiteur → /home (espace public)
- *    - Si aucun rôle mémorisé → /home (espace public)
+ *    - Vérifier le rôle mémorisé (cenadi_role)
+ *    - Si admin mémorisé → /login (doit se réauthentifier)
+ *    - Sinon → /home (espace public)
  * 
  * 3. Si mode lockdown activé :
  *    - Tout le monde (sauf admins connectés) → /login
@@ -30,7 +29,7 @@ export default function PublicAccessGuard() {
     isAuthenticated, 
     isAdmin, 
     isSuperAdmin,
-    isAdminRole
+    rememberedRole
   } = useAuth();
   
   const location = useLocation();
@@ -68,7 +67,6 @@ export default function PublicAccessGuard() {
   if (isAuthenticated && user) {
     // 1a. Admin / Super Admin → dashboard
     if (isAdminUser) {
-      // S'il essaie d'accéder à une page non-admin, on le redirige vers le dashboard
       if (!location.pathname.startsWith('/admin')) {
         return <Navigate to="/admin/dashboard" replace />;
       }
@@ -76,7 +74,6 @@ export default function PublicAccessGuard() {
     }
 
     // 1b. Personnel / Visiteur connecté → home
-    // S'il essaie d'accéder à une page admin, on le redirige vers /home
     if (location.pathname.startsWith('/admin')) {
       return <Navigate to="/home" replace />;
     }
@@ -97,9 +94,12 @@ export default function PublicAccessGuard() {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // 2c. ✅ Vérifier le rôle mémorisé
-  // Si c'est un admin (même déconnecté) → login (doit se réauthentifier)
-  if (isAdminRole) {
+  // 2c. ✅ Vérifier le rôle mémorisé pour les admins
+  // Si le rôle mémorisé est admin ou super_admin → login (doit se réauthentifier)
+  const rememberedIsAdmin = rememberedRole === 'admin' || rememberedRole === 'super_admin';
+  
+  if (rememberedIsAdmin) {
+    // C'est un admin (même déconnecté) → doit se réauthentifier
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
