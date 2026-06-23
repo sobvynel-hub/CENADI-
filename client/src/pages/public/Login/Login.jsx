@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Eye, EyeOff, LogIn, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, LogIn, ArrowLeft, Shield, User, Users, Compass } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 
 export default function Login() {
-  const { login, user } = useAuth();
+  const { login, logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,6 +56,53 @@ export default function Login() {
     } catch (err) {
       console.error("Erreur de connexion:", err);
       setError(err.message || 'Identifiants incorrects');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickLogin = async (email, password) => {
+    setError('');
+    setLoading(true);
+    setForm({ email, password });
+
+    try {
+      const response = await login(email, password);
+      console.log("✅ Connecté avec succès via Connexion Rapide", response);
+      
+      const userRole = response?.role || response?.user?.role || response?.data?.user?.role;
+      const from = location.state?.from || '/home';
+      
+      if (userRole === 'admin' || userRole === 'super_admin') {
+        if (from.startsWith('/admin')) {
+          navigate(from, { replace: true });
+        } else {
+          navigate('/admin/dashboard', { replace: true });
+        }
+      } else {
+        navigate(from, { replace: true });
+      }
+    } catch (err) {
+      console.error("Erreur de connexion rapide:", err);
+      setError(err.message || 'Identifiants incorrects');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVisitorAccess = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const storedUser = localStorage.getItem('cenadi_user');
+      const token = localStorage.getItem('cenadi_token');
+      if (storedUser || token) {
+        await logout();
+      }
+      navigate('/home', { replace: true });
+    } catch (err) {
+      console.error("Erreur accès visiteur:", err);
+      navigate('/home', { replace: true });
     } finally {
       setLoading(false);
     }
@@ -160,6 +207,96 @@ export default function Login() {
               {loading ? 'Connexion...' : 'Se connecter'}
             </button>
           </form>
+
+          {/* Section Connexion Rapide */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white dark:bg-slate-800 px-3 text-slate-500 dark:text-slate-400 font-semibold tracking-wider">
+                Mode Démo / Connexion Rapide
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => handleQuickLogin('super@cenadi.cm', 'Admin123456!')}
+              className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-emerald-50 hover:border-emerald-200 dark:hover:bg-emerald-950/20 dark:hover:border-emerald-900/50 hover:shadow-sm text-left transition-all duration-200 group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Shield size={16} />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                  Super Admin
+                </p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                  super@cenadi.cm
+                </p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => handleQuickLogin('admin@cenadi.cm', 'Admin123456!')}
+              className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-blue-50 hover:border-blue-200 dark:hover:bg-blue-950/20 dark:hover:border-blue-900/50 hover:shadow-sm text-left transition-all duration-200 group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <User size={16} />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+                  Admin
+                </p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                  admin@cenadi.cm
+                </p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => handleQuickLogin('employe@cenadi.cm', 'Admin123456!')}
+              className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-indigo-50 hover:border-indigo-200 dark:hover:bg-indigo-950/20 dark:hover:border-indigo-900/50 hover:shadow-sm text-left transition-all duration-200 group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Users size={16} />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors">
+                  Personnel
+                </p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                  employe@cenadi.cm
+                </p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              disabled={loading}
+              onClick={handleVisitorAccess}
+              className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-amber-50 hover:border-amber-200 dark:hover:bg-amber-950/20 dark:hover:border-amber-900/50 hover:shadow-sm text-left transition-all duration-200 group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Compass size={16} />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
+                  Visiteur
+                </p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                  Accès Public Libre
+                </p>
+              </div>
+            </button>
+          </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-slate-500 dark:text-slate-400">

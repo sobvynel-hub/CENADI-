@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { AdminRoute } from './routes/PrivateRoute';
+import { useAuth } from './hooks/useAuth';
 import ExpenseMemoPage from './pages/admin/ExpenseMemo/ExpenseMemoPage';
 import FormationReport from './pages/admin/Reports/FormationReport';
 
@@ -65,6 +66,17 @@ function PublicLayout({ children }) {
   );
 }
 
+// Redirection intelligente selon le rôle de l'utilisateur à la racine de l'application
+function RootRedirect() {
+  const { isAuthenticated, isAdmin } = useAuth();
+  
+  if (isAuthenticated && isAdmin) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  
+  return <Navigate to="/home" replace />;
+}
+
 export default function App() {
   return (
     <BrowserRouter
@@ -112,7 +124,7 @@ export default function App() {
 
           <Routes>
             {/* Redirection racine */}
-            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="/" element={<RootRedirect />} />
 
             {/* ============ ROUTES TOUJOURS ACCESSIBLES (sans guard) ============ */}
             {/* Routes d'authentification */}
