@@ -3,16 +3,15 @@
  * Vérifie le statut de l'accès public et gère les redirections par rôle
  * 
  * LOGIQUE :
- * - Si mode lockdown activé (publicAccess.enabled = false) :
- *   → Tous les utilisateurs non authentifiés → redirigés vers /login
- *   → Les admins peuvent accéder après connexion
- *   → Les personnels/visiteurs → redirigés vers /login
+ * - Mode lockdown activé (publicAccess.enabled = false) :
+ *   → Tous les utilisateurs (même non connectés) → accèdent à /home
+ *   → Les admins sont redirigés vers /login s'ils ne sont pas connectés
+ *   → Les admins connectés accèdent au dashboard
  * 
- * - Si mode normal (publicAccess.enabled = true) :
- *   → Admin non connecté → redirigé vers /login
- *   → Personnel/Visiteur non connecté → accède à /home
- *   → Admin connecté → accède au dashboard
- *   → Personnel connecté → accède à /home
+ * - Mode normal (publicAccess.enabled = true) :
+ *   → Visiteurs → /home
+ *   → Admin non connecté → /login
+ *   → Admin connecté → /admin/dashboard
  */
 
 import { useEffect, useState } from 'react';
@@ -35,7 +34,6 @@ export default function PublicAccessGuard() {
         setPublicAccess(data?.publicAccess);
       } catch (error) {
         console.error('Erreur vérification accès public:', error);
-        // En cas d'erreur, on considère que l'accès est ouvert
         setPublicAccess({ enabled: true });
       } finally {
         setLoading(false);
@@ -45,7 +43,6 @@ export default function PublicAccessGuard() {
     checkPublicAccess();
   }, []);
 
-  // Pendant le chargement
   if (loading) {
     return <Loader fullScreen text="Vérification de l'accès..." />;
   }
@@ -55,41 +52,41 @@ export default function PublicAccessGuard() {
 
   // ============ CAS 1 : Utilisateur authentifié ============
   if (isAuthenticated && user) {
-    // Si l'utilisateur est Admin ou Super Admin
+    // Admin ou Super Admin
     if (isAdminUser) {
-      // S'il essaie d'accéder à une page non-admin, on le redirige vers le dashboard
       if (!location.pathname.startsWith('/admin')) {
         return <Navigate to="/admin/dashboard" replace />;
       }
-      // Sinon, on le laisse passer
       return <Outlet />;
     }
 
-    // Si l'utilisateur est un personnel ou visiteur connecté
-    // S'il essaie d'accéder à une page admin, on le redirige vers /home
+    // Personnel / Visiteur connecté
     if (location.pathname.startsWith('/admin')) {
       return <Navigate to="/home" replace />;
     }
-    // Sinon, on le laisse passer
     return <Outlet />;
   }
 
   // ============ CAS 2 : Utilisateur NON authentifié ============
 
-  // 2a. Si le mode lockdown est activé : TOUT LE MONDE → login
-  if (isLockdown) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
-  }
-
-  // 2b. Mode normal : on vérifie le rôle pour la redirection
-
-  // On ne peut pas déterminer le rôle d'un utilisateur non connecté
-  // Donc on laisse passer vers les pages publiques (home, formations, etc.)
-  // Mais on bloque l'accès aux pages admin via le composant AdminRoute
+  // ✅ NOUVEAU : Si c'est un admin qui essaie d'accéder (on ne peut pas savoir), on le redirige vers login
+  // Mais pour les visiteurs normaux, on les laisse aller sur /home
 
   // Si l'utilisateur essaie d'accéder à une page admin, on le redirige vers login
   if (location.pathname.startsWith('/admin')) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  // ✅ NOUVEAU : Même en lockdown, les visiteurs peuvent voir la page d'accueil
+  // Mais ils ne peuvent pas accéder aux autres pages (formations, blog, etc.)
+  // Si vous voulez bloquer tout sauf /home en lockdown, décommentez les lignes ci-dessous
+
+  // Si le mode lockdown est activé et que l'utilisateur essaie d'accéder à autre chose que /home
+  if (isLockdown && location.pathname !== '/home') {
+    // Autoriser l'accès à /home uniquement
+    if (location.pathname !== '/home') {
+      return <Navigate to="/home" replace />;
+    }
   }
 
   // Sinon, on laisse passer vers les pages publiques
