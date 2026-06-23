@@ -9,7 +9,6 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import toast from 'react-hot-toast';
 
-// Navigation items pour tous les admins
 const navItems = [
   { path: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
   { path: '/admin/formations', label: 'Formations', icon: BookOpen },
@@ -17,11 +16,10 @@ const navItems = [
   { path: '/admin/enrollments', label: 'Inscriptions', icon: CalendarCheck },
   { path: '/admin/personal-trainings', label: 'Formations perso.', icon: FileText },
   { path: '/admin/blog', label: 'Blog', icon: Newspaper },
-  { path: '/admin/search', label: 'Recherche', icon: Search },
-  { path: '/admin/statistics', label: 'Statistiques', icon: BarChart3 },
+  //{ path: '/admin/search', label: 'Recherche', icon: Search },
+  //{ path: '/admin/statistics', label: 'Statistiques', icon: BarChart3 },
 ];
 
-// Navigation items pour Super Admin uniquement
 const superAdminItems = [
   { path: '/admin/admins', label: 'Administrateurs', icon: Shield },
   { path: '/admin/settings', label: 'Paramètres', icon: Settings },
@@ -32,14 +30,12 @@ export default function AdminSidebar({ isOpen, onToggle }) {
   const { dark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
+  console.log('✅ AdminSidebar rendu, isOpen:', isOpen);
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
     toast.success('Déconnecté avec succès');
-  };
-
-  const handleToggle = () => {
-    onToggle();
   };
 
   return (
@@ -59,7 +55,7 @@ export default function AdminSidebar({ isOpen, onToggle }) {
         flex flex-col transition-all duration-300 ease-in-out
         ${isOpen ? 'w-64 translate-x-0' : 'w-20 -translate-x-full lg:translate-x-0'}
       `}>
-        {/* Logo avec bouton toggle */}
+        {/* Logo */}
         <div className="h-16 flex items-center justify-between px-3 border-b border-slate-200 dark:border-slate-700">
           <div className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ${isOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 lg:w-auto lg:opacity-100'}`}>
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center flex-shrink-0">
@@ -77,7 +73,7 @@ export default function AdminSidebar({ isOpen, onToggle }) {
           </div>
           
           <button 
-            onClick={handleToggle}
+            onClick={onToggle}
             className="hidden lg:flex items-center justify-center p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200"
             title={isOpen ? "Réduire le menu" : "Agrandir le menu"}
           >
@@ -117,7 +113,6 @@ export default function AdminSidebar({ isOpen, onToggle }) {
             </NavLink>
           ))}
 
-          {/* Séparateur Super Admin */}
           {isSuperAdmin && (
             <>
               <div className="h-px bg-slate-200 dark:bg-slate-700 my-2 mx-2" />
@@ -145,7 +140,7 @@ export default function AdminSidebar({ isOpen, onToggle }) {
           )}
         </nav>
 
-        {/* Footer - Thème et Déconnexion */}
+        {/* Footer */}
         <div className="p-2 border-t border-slate-200 dark:border-slate-700 space-y-0.5">
           <button
             onClick={toggleTheme}

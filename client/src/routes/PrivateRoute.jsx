@@ -16,7 +16,6 @@ export function PrivateRoute({ children }) {
 
 /**
  * AdminRoute — Protège les routes admin/super_admin
- * Utilisé comme wrapper pour les routes enfants
  */
 export function AdminRoute({ children, superAdminOnly = false }) {
   const { user, loading, isAdmin, isSuperAdmin, memorizedRole } = useAuth();
@@ -31,18 +30,19 @@ export function AdminRoute({ children, superAdminOnly = false }) {
     path: location.pathname,
   });
 
-  if (loading) return <Loader fullScreen />;
+  if (loading) {
+    return <Loader fullScreen text="Chargement..." />;
+  }
 
-  // ✅ Vérifier avec le rôle mémorisé si user est null
+  // Vérifier avec le rôle mémorisé si user est null
   if (!user && memorizedRole) {
     const isAdminMemorized = memorizedRole === 'admin' || memorizedRole === 'super_admin';
     if (!isAdminMemorized) {
       console.log('🚫 Accès refusé: rôle non-admin mémorisé');
       return <Navigate to="/forbidden" replace />;
     }
-    // Si admin mémorisé mais user null → attendre (rechargement)
     console.log('⏳ Admin mémorisé, attente du chargement...');
-    return <Loader fullScreen text="Chargement..." />;
+    return <Loader fullScreen text="Chargement du profil..." />;
   }
 
   if (!user) {
@@ -66,7 +66,6 @@ export function AdminRoute({ children, superAdminOnly = false }) {
 
 /**
  * RoleRedirect — Redirige automatiquement selon le rôle
- * Utilisé pour les routes publiques
  */
 export function RoleRedirect({ children }) {
   const { user, loading, isAdmin, memorizedRole } = useAuth();
@@ -79,23 +78,23 @@ export function RoleRedirect({ children }) {
     path: location.pathname,
   });
 
-  if (loading) return <Loader fullScreen />;
+  if (loading) return <Loader fullScreen text="Vérification..." />;
 
-  // ✅ Si connecté
+  // Si connecté
   if (user) {
-    // ✅ Admin sur page d'accueil → rediriger vers dashboard
+    // Admin sur page d'accueil → rediriger vers dashboard
     if (isAdmin && (location.pathname === '/' || location.pathname === '/home')) {
       console.log('🔄 Admin sur / ou /home → redirection dashboard');
       return <Navigate to="/admin/dashboard" replace />;
     }
 
-    // ✅ Admin sur une route publique (non-admin) → rediriger vers dashboard
+    // Admin sur une route publique → rediriger vers dashboard
     if (isAdmin && !location.pathname.startsWith('/admin')) {
       console.log('🔄 Admin sur route publique → redirection dashboard');
       return <Navigate to="/admin/dashboard" replace />;
     }
 
-    // ✅ Non-admin sur route admin → rediriger vers home
+    // Non-admin sur route admin → rediriger vers home
     if (!isAdmin && location.pathname.startsWith('/admin')) {
       console.log('🔄 Non-admin sur route admin → redirection home');
       return <Navigate to="/home" replace />;
@@ -104,11 +103,9 @@ export function RoleRedirect({ children }) {
     return children;
   }
 
-  // ✅ Si le rôle est mémorisé (refresh en cours)
+  // Si le rôle est mémorisé (refresh en cours)
   if (memorizedRole && !user) {
     const isAdminMemorized = memorizedRole === 'admin' || memorizedRole === 'super_admin';
-
-    // Admin mémorisé mais pas encore chargé → attendre
     if (isAdminMemorized && location.pathname !== '/login') {
       console.log('⏳ Admin mémorisé, attente du chargement...');
       return <Loader fullScreen text="Chargement du profil..." />;
@@ -118,3 +115,6 @@ export function RoleRedirect({ children }) {
   // Non connecté → afficher le contenu public
   return children;
 }
+
+// Export par défaut pour compatibilité
+export default AdminRoute;

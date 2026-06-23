@@ -47,6 +47,8 @@ import ExpenseMemoPage from './pages/admin/ExpenseMemo/ExpenseMemoPage';
 import FormationReport from './pages/admin/Reports/FormationReport';
 
 function App() {
+  console.log('🚀 App démarrée');
+
   return (
     <BrowserRouter
       future={{
@@ -61,9 +63,9 @@ function App() {
             toastOptions={{
               duration: 4000,
               style: {
-                background: 'var(--toast-bg, #ffffff)',
-                color: 'var(--toast-color, #0f172a)',
-                border: '1px solid var(--toast-border, #e2e8f0)',
+                background: '#ffffff',
+                color: '#0f172a',
+                border: '1px solid #e2e8f0',
                 borderRadius: '12px',
                 padding: '12px 16px',
                 fontSize: '14px',
@@ -78,7 +80,7 @@ function App() {
             {/* Redirection racine */}
             <Route path="/" element={<Navigate to="/home" replace />} />
 
-            {/* 🔓 Routes d'authentification - TOUJOURS accessibles */}
+            {/* 🔓 Routes d'authentification */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -86,62 +88,40 @@ function App() {
             <Route path="/maintenance" element={<Maintenance />} />
             <Route path="/forbidden" element={<Forbidden />} />
 
-            {/* 🏠 Routes publiques avec Layout */}
-            <Route element={<PublicAccessGuard />}>
-              <Route element={<Layout />}>
-                <Route path="/home" element={<Home />} />
-                <Route path="/formations" element={<Formations />} />
-                <Route path="/formations/:id" element={<FormationDetail />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-              </Route>
-            </Route>
+            {/* 🏠 Routes publiques */}
+            <Route path="/home" element={<Layout><Home /></Layout>} />
+            <Route path="/formations" element={<Layout><Formations /></Layout>} />
+            <Route path="/formations/:id" element={<Layout><FormationDetail /></Layout>} />
+            <Route path="/blog" element={<Layout><Blog /></Layout>} />
+            <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
+            <Route path="/about" element={<Layout><About /></Layout>} />
+            <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
-            {/* 🔐 Routes Admin avec AdminLayout - ICI LA CORRECTION */}
-            <Route element={<PublicAccessGuard />}>
-              <Route element={<AdminRoute />}>
-                <Route element={<AdminLayout />}>
-                  <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-                  <Route path="/admin/dashboard" element={<Dashboard />} />
+            {/* 🔐 Routes Admin */}
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/admin/dashboard" element={<AdminRoute><AdminLayout><Dashboard /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/formations" element={<AdminRoute><AdminLayout><FormationsList /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/formations/new" element={<AdminRoute><AdminLayout><FormationForm /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/formations/:id" element={<AdminRoute><AdminLayout><AdminFormationDetail /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/enrollments" element={<AdminRoute><AdminLayout><EnrollmentsList /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/attendances" element={<AdminRoute><AdminLayout><AttendancesList /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/certificates" element={<AdminRoute><AdminLayout><CertificatesList /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><AdminLayout><UsersList /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/users/:id" element={<AdminRoute><AdminLayout><UserDetail /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/divisions" element={<AdminRoute><AdminLayout><DivisionsList /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/personal-trainings" element={<AdminRoute><AdminLayout><PersonalTrainingsList /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/expense-memo/:id" element={<AdminRoute><AdminLayout><ExpenseMemoPage /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/reports/formation/:id" element={<AdminRoute><AdminLayout><FormationReport /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/search" element={<AdminRoute><AdminLayout><GlobalSearch /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/statistics" element={<AdminRoute><AdminLayout><Statistics /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/blog" element={<AdminRoute><AdminLayout><BlogManager /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/suggestions" element={<AdminRoute><AdminLayout><SuggestionsManager /></AdminLayout></AdminRoute>} />
+            
+            {/* Super Admin */}
+            <Route path="/admin/settings" element={<AdminRoute superAdminOnly><AdminLayout><Settings /></AdminLayout></AdminRoute>} />
+            <Route path="/admin/admins" element={<AdminRoute superAdminOnly><AdminLayout><AdminsList /></AdminLayout></AdminRoute>} />
 
-                  {/* Formations */}
-                  <Route path="/admin/formations" element={<FormationsList />} />
-                  <Route path="/admin/formations/new" element={<FormationForm />} />
-                  <Route path="/admin/formations/:id" element={<AdminFormationDetail />} />
-                  <Route path="/admin/expense-memo/:id" element={<ExpenseMemoPage />} />
-                  <Route path="/admin/reports/formation/:id" element={<FormationReport />} />
-
-                  {/* Gestion */}
-                  <Route path="/admin/enrollments" element={<EnrollmentsList />} />
-                  <Route path="/admin/attendances" element={<AttendancesList />} />
-                  <Route path="/admin/certificates" element={<CertificatesList />} />
-                  <Route path="/admin/personal-trainings" element={<PersonalTrainingsList />} />
-
-                  {/* Utilisateurs */}
-                  <Route path="/admin/users" element={<UsersList />} />
-                  <Route path="/admin/users/:id" element={<UserDetail />} />
-
-                  {/* Divers */}
-                  <Route path="/admin/divisions" element={<DivisionsList />} />
-                  <Route path="/admin/search" element={<GlobalSearch />} />
-                  <Route path="/admin/statistics" element={<Statistics />} />
-
-                  {/* Blog admin */}
-                  <Route path="/admin/blog" element={<BlogManager />} />
-                  <Route path="/admin/suggestions" element={<SuggestionsManager />} />
-
-                  {/* Super Admin uniquement */}
-                  <Route element={<AdminRoute superAdminOnly />}>
-                    <Route path="/admin/settings" element={<Settings />} />
-                    <Route path="/admin/admins" element={<AdminsList />} />
-                  </Route>
-                </Route>
-              </Route>
-            </Route>
-
-            {/* 404 - Page non trouvée */}
+            {/* 404 */}
             <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>
         </AuthProvider>
