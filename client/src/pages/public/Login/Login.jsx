@@ -18,12 +18,9 @@ export default function Login() {
     if (user) {
       const userRole = user?.role;
       
-      // Admin / Super Admin → dashboard
       if (userRole === 'admin' || userRole === 'super_admin') {
         navigate('/admin/dashboard', { replace: true });
-      } 
-      // Personnel / Visiteur → home
-      else {
+      } else {
         navigate('/home', { replace: true });
       }
     }
@@ -53,9 +50,7 @@ export default function Login() {
         } else {
           navigate('/admin/dashboard', { replace: true });
         }
-      } 
-      // Personnel / Visiteur → home
-      else {
+      } else {
         navigate(from, { replace: true });
       }
     } catch (err) {
