@@ -7,7 +7,7 @@ export default function Layout() {
     <div className="min-h-screen bg-white dark:bg-dark-bg flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <Outlet />
+        <Outlet />  {/* ← C'est ici que le contenu public s'affiche */}
       </main>
       <Footer />
     </div>

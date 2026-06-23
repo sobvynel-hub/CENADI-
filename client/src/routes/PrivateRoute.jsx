@@ -16,7 +16,7 @@ export function PrivateRoute({ children }) {
 
 /**
  * AdminRoute — Protège les routes admin/super_admin
- * @param {boolean} superAdminOnly — Si true, seul super_admin peut accéder
+ * Utilisé comme wrapper pour les routes enfants
  */
 export function AdminRoute({ children, superAdminOnly = false }) {
   const { user, loading, isAdmin, isSuperAdmin, memorizedRole } = useAuth();
@@ -28,6 +28,7 @@ export function AdminRoute({ children, superAdminOnly = false }) {
     isSuperAdmin,
     memorizedRole,
     superAdminOnly,
+    path: location.pathname,
   });
 
   if (loading) return <Loader fullScreen />;
@@ -83,13 +84,13 @@ export function RoleRedirect({ children }) {
   // ✅ Si connecté
   if (user) {
     // ✅ Admin sur page d'accueil → rediriger vers dashboard
-    if (isAdmin && location.pathname === '/') {
-      console.log('🔄 Admin sur / → redirection dashboard');
+    if (isAdmin && (location.pathname === '/' || location.pathname === '/home')) {
+      console.log('🔄 Admin sur / ou /home → redirection dashboard');
       return <Navigate to="/admin/dashboard" replace />;
     }
 
     // ✅ Admin sur une route publique (non-admin) → rediriger vers dashboard
-    if (isAdmin && !location.pathname.startsWith('/admin') && location.pathname !== '/') {
+    if (isAdmin && !location.pathname.startsWith('/admin')) {
       console.log('🔄 Admin sur route publique → redirection dashboard');
       return <Navigate to="/admin/dashboard" replace />;
     }
