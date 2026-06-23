@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
-import { RoleRedirect, AdminRoute } from './routes/PrivateRoute';
+import { AdminRoute } from './routes/PrivateRoute';
 import PublicAccessGuard from './middleware/PublicAccessGuard';
 
 // Layouts
@@ -71,24 +71,6 @@ function App() {
                 boxShadow:
                   '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
               },
-              success: {
-                iconTheme: {
-                  primary: '#10b981',
-                  secondary: 'var(--toast-bg, #ffffff)',
-                },
-              },
-              error: {
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: 'var(--toast-bg, #ffffff)',
-                },
-              },
-              loading: {
-                iconTheme: {
-                  primary: '#6366f1',
-                  secondary: 'var(--toast-bg, #ffffff)',
-                },
-              },
             }}
           />
 
@@ -104,16 +86,8 @@ function App() {
             <Route path="/maintenance" element={<Maintenance />} />
             <Route path="/forbidden" element={<Forbidden />} />
 
-            {/* 🏠 Routes publiques avec RoleRedirect */}
-            <Route
-              element={
-                <PublicAccessGuard>
-                  <RoleRedirect>
-                    <Layout />
-                  </RoleRedirect>
-                </PublicAccessGuard>
-              }
-            >
+            {/* 🏠 Routes publiques avec Layout */}
+            <Route element={<PublicAccessGuard><Layout /></PublicAccessGuard>}>
               <Route path="/home" element={<Home />} />
               <Route path="/formations" element={<Formations />} />
               <Route path="/formations/:id" element={<FormationDetail />} />
@@ -123,16 +97,8 @@ function App() {
               <Route path="/contact" element={<Contact />} />
             </Route>
 
-            {/* 🔐 Routes Admin avec protection */}
-            <Route
-              element={
-                <PublicAccessGuard>
-                  <AdminRoute>
-                    <AdminLayout />
-                  </AdminRoute>
-                </PublicAccessGuard>
-              }
-            >
+            {/* 🔐 Routes Admin avec AdminLayout */}
+            <Route element={<PublicAccessGuard><AdminRoute><AdminLayout /></AdminRoute></PublicAccessGuard>}>
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="/admin/dashboard" element={<Dashboard />} />
 
@@ -164,15 +130,7 @@ function App() {
             </Route>
 
             {/* 👑 Routes Super Admin (protection renforcée) */}
-            <Route
-              element={
-                <PublicAccessGuard>
-                  <AdminRoute superAdminOnly>
-                    <AdminLayout />
-                  </AdminRoute>
-                </PublicAccessGuard>
-              }
-            >
+            <Route element={<PublicAccessGuard><AdminRoute superAdminOnly><AdminLayout /></AdminRoute></PublicAccessGuard>}>
               <Route path="/admin/settings" element={<Settings />} />
               <Route path="/admin/admins" element={<AdminsList />} />
             </Route>
