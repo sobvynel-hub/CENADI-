@@ -1,6 +1,8 @@
 export const ROLES = {
   ADMIN: 'admin',
   SUPER_ADMIN: 'super_admin',
+  EMPLOYEE: 'employee',
+  USER: 'user',
 };
 
 // ✅ CORRIGÉ BUG #4 : aligné avec le backend
@@ -44,6 +46,7 @@ export const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé', 'Expert'];
 export const NAV_LINKS = [
   { label: 'Accueil', path: '/' },
   { label: 'Formations', path: '/formations' },
+  { label: 'Blog', path: '/blog' },
   { label: 'À propos', path: '/about' },
   { label: 'Contact', path: '/contact' },
 ];
@@ -56,6 +59,8 @@ export const ADMIN_NAV = [
   { label: 'Attestations', path: '/admin/certificates', icon: 'Award' },
   { label: 'Employés', path: '/admin/users', icon: 'Users' },
   { label: 'Divisions', path: '/admin/divisions', icon: 'Building2' },
+  { label: 'Blog', path: '/admin/blog', icon: 'Newspaper' },
+  { label: 'Suggestions', path: '/admin/suggestions', icon: 'Lightbulb' },
   { label: 'Recherche', path: '/admin/search', icon: 'Search' },
   { label: 'Statistiques', path: '/admin/statistics', icon: 'BarChart2' },
 ];

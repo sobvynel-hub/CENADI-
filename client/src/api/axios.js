@@ -17,7 +17,6 @@ const api = axios.create({
 // Intercepteur pour ajouter le token JWT à chaque requête
 api.interceptors.request.use(
   (config) => {
-    // ✅ CORRECTION : Utiliser la même clé que AuthContext
     const token = localStorage.getItem('cenadi_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -36,47 +35,50 @@ api.interceptors.response.use(
     // Gestion de l'erreur 503 (mode lockdown)
     if (error.response?.status === 503) {
       const errorData = error.response?.data;
-      const message = errorData?.message || "L'application est actuellement en maintenance. Veuillez réessayer plus tard.";
-      
+      const message =
+        errorData?.message ||
+        "L'application est actuellement en maintenance. Veuillez réessayer plus tard.";
+
       // Afficher une notification
       toast.error(message, {
         duration: 5000,
         position: 'top-center',
       });
-      
+
       // Vérifier si l'utilisateur est sur une route publique
-      const isPublicRoute = !window.location.pathname.includes('/admin') 
-        && !window.location.pathname.includes('/dashboard')
-        && window.location.pathname !== '/login';
-      
+      const isPublicRoute =
+        !window.location.pathname.includes('/admin') &&
+        !window.location.pathname.includes('/dashboard') &&
+        window.location.pathname !== '/login';
+
       // Rediriger vers une page de maintenance si nécessaire
       if (isPublicRoute && !window.location.pathname.includes('/maintenance')) {
         window.location.href = '/maintenance';
       }
     }
-    
+
     // Gestion des erreurs 401 (non authentifié / session expirée)
     if (error.response?.status === 401) {
-      // ✅ CORRECTION : Utiliser la même clé que AuthContext
       const token = localStorage.getItem('cenadi_token');
       if (token) {
         localStorage.removeItem('cenadi_token');
         localStorage.removeItem('cenadi_user');
+        localStorage.removeItem('cenadi_role');
         toast.error('Session expirée. Veuillez vous reconnecter.');
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';
         }
       }
     }
-    
+
     // Gestion des erreurs 403 (accès interdit)
     if (error.response?.status === 403) {
-      toast.error('Vous n\'avez pas les droits nécessaires pour effectuer cette action.');
+      toast.error("Vous n'avez pas les droits nécessaires pour effectuer cette action.");
       if (!window.location.pathname.includes('/forbidden')) {
         window.location.href = '/forbidden';
       }
     }
-    
+
     return Promise.reject(error);
   }
 );

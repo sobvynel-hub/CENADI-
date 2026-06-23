@@ -20,7 +20,7 @@ export const formatDateTime = (dateStr) => formatDate(dateStr, 'dd MMM yyyy, HH:
 export const exportCSV = (data, filename = 'export.csv') => {
   if (!data || !data.length) return;
   const headers = Object.keys(data[0]).join(',');
-  const rows = data.map(row => Object.values(row).map(v => `"${v ?? ''}"`).join(','));
+  const rows = data.map((row) => Object.values(row).map((v) => `"${v ?? ''}"`).join(','));
   const csv = [headers, ...rows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -67,7 +67,7 @@ export const getStatusLabel = (status) => {
 };
 
 /* ─── Utilitaires généraux ─── */
-export const truncate = (str, n = 60) => str?.length > n ? str.slice(0, n) + '…' : str;
+export const truncate = (str, n = 60) => (str?.length > n ? str.slice(0, n) + '…' : str);
 
 export const initials = (firstName, lastName) => {
   if (!firstName && !lastName) return '?';
@@ -75,3 +75,14 @@ export const initials = (firstName, lastName) => {
 };
 
 export const classNames = (...classes) => classes.filter(Boolean).join(' ');
+
+// ✅ Ajout de getRoleLabel pour l'affichage
+export const getRoleLabel = (role) => {
+  const labels = {
+    super_admin: 'Super Admin',
+    admin: 'Admin',
+    employee: 'Personnel',
+    user: 'Visiteur',
+  };
+  return labels[role] || role;
+};

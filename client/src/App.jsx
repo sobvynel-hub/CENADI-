@@ -2,36 +2,28 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
-import { AdminRoute } from './routes/PrivateRoute';
-import { useAuth } from './hooks/useAuth';
-import ExpenseMemoPage from './pages/admin/ExpenseMemo/ExpenseMemoPage';
-import FormationReport from './pages/admin/Reports/FormationReport';
+import { RoleRedirect, AdminRoute } from './routes/PrivateRoute';
+import PublicAccessGuard from './middleware/PublicAccessGuard';
 
-// Composants communs
-import Navbar from './components/common/Navbar';
-import Footer from './components/common/Footer';
+// Layouts
+import Layout from './components/common/Layout';
 import AdminLayout from './components/common/AdminLayout';
 
 // Pages publiques
 import Home from './pages/public/Home/Home';
 import Formations from './pages/public/Formations/Formations';
 import FormationDetail from './pages/public/FormationDetail/FormationDetail';
-import Contact from './pages/public/Contact/Contact';
-import About from './pages/public/About/About';
-import Login from './pages/public/Login/Login';
-import Register from './pages/public/Register/Register';
-import NotFound from './pages/public/NotFound/NotFound';
-import Forbidden from './pages/public/Forbidden/Forbidden';
-import ForgotPassword from './pages/public/ForgotPassword/ForgotPassword';
-import ResetPassword from './pages/public/ResetPassword/ResetPassword';
-// ✅ Pages du blog
 import Blog from './pages/public/Blog/Blog';
 import BlogPost from './pages/public/Blog/BlogPost';
-// ✅ Page de maintenance (mode lockdown)
+import About from './pages/public/About/About';
+import Contact from './pages/public/Contact/Contact';
+import Login from './pages/public/Login/Login';
+import Register from './pages/public/Register/Register';
+import ForgotPassword from './pages/public/ForgotPassword/ForgotPassword';
+import ResetPassword from './pages/public/ResetPassword/ResetPassword';
 import Maintenance from './pages/public/Maintenance/Maintenance';
-
-// ✅ Guard d'accès public
-import PublicAccessGuard from './middleware/PublicAccessGuard';
+import Forbidden from './pages/public/Forbidden/Forbidden';
+import NotFound from './pages/public/NotFound/NotFound';
 
 // Pages admin
 import Dashboard from './pages/admin/Dashboard/Dashboard';
@@ -49,35 +41,12 @@ import Statistics from './pages/admin/Statistics/Statistics';
 import PersonalTrainingsList from './pages/admin/PersonalTrainings/PersonalTrainingsList';
 import Settings from './pages/admin/Settings/Settings';
 import AdminsList from './pages/admin/Admins/AdminsList';
-// ✅ Pages admin du blog
 import BlogManager from './pages/admin/Blog/BlogManager';
 import SuggestionsManager from './pages/admin/Blog/SuggestionsManager';
+import ExpenseMemoPage from './pages/admin/ExpenseMemo/ExpenseMemoPage';
+import FormationReport from './pages/admin/Reports/FormationReport';
 
-// Layout pour les pages publiques
-function PublicLayout({ children }) {
-  return (
-    <div className="min-h-screen bg-white dark:bg-dark-bg flex flex-col">
-      <Navbar />
-      <main className="flex-1">
-        {children}
-      </main>
-      <Footer />
-    </div>
-  );
-}
-
-// Redirection intelligente selon le rôle de l'utilisateur à la racine de l'application
-function RootRedirect() {
-  const { isAuthenticated, isAdmin } = useAuth();
-  
-  if (isAuthenticated && isAdmin) {
-    return <Navigate to="/admin/dashboard" replace />;
-  }
-  
-  return <Navigate to="/home" replace />;
-}
-
-export default function App() {
+function App() {
   return (
     <BrowserRouter
       future={{
@@ -99,7 +68,8 @@ export default function App() {
                 padding: '12px 16px',
                 fontSize: '14px',
                 fontWeight: '500',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                boxShadow:
+                  '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
               },
               success: {
                 iconTheme: {
@@ -124,82 +94,96 @@ export default function App() {
 
           <Routes>
             {/* Redirection racine */}
-            <Route path="/" element={<RootRedirect />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
 
-            {/* ============ ROUTES TOUJOURS ACCESSIBLES (sans guard) ============ */}
-            {/* Routes d'authentification */}
+            {/* 🔓 Routes d'authentification - TOUJOURS accessibles */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
-            
-            {/* Page de maintenance (mode lockdown) */}
             <Route path="/maintenance" element={<Maintenance />} />
+            <Route path="/forbidden" element={<Forbidden />} />
 
-            {/* ============ ROUTES PROTÉGÉES PAR PublicAccessGuard ============ */}
-            <Route element={<PublicAccessGuard />}>
-              {/* Routes publiques normales */}
-              <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
-              <Route path="/formations" element={<PublicLayout><Formations /></PublicLayout>} />
-              <Route path="/formations/:id" element={<PublicLayout><FormationDetail /></PublicLayout>} />
-              <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
-              <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-              <Route path="/forbidden" element={<PublicLayout><Forbidden /></PublicLayout>} />
-              
-              {/* Routes du blog public */}
-              <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
-              <Route path="/blog/:slug" element={<PublicLayout><BlogPost /></PublicLayout>} />
-
-              {/* Routes admin (protégées) */}
-              <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
-                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="/admin/dashboard" element={<Dashboard />} />
-
-                {/* Formations */}
-                <Route path="/admin/formations" element={<FormationsList />} />
-                <Route path="/admin/formations/new" element={<FormationForm />} />
-                <Route path="/admin/formations/:id" element={<AdminFormationDetail />} />
-                <Route path="/admin/expense-memo/:id" element={<ExpenseMemoPage />} />
-                <Route path="/admin/reports/formation/:id" element={<FormationReport />} />
-
-                {/* Gestion */}
-                <Route path="/admin/enrollments" element={<EnrollmentsList />} />
-                <Route path="/admin/attendances" element={<AttendancesList />} />
-                <Route path="/admin/certificates" element={<CertificatesList />} />
-                <Route path="/admin/personal-trainings" element={<PersonalTrainingsList />} />
-
-                {/* Utilisateurs */}
-                <Route path="/admin/users" element={<UsersList />} />
-                <Route path="/admin/users/:id" element={<UserDetail />} />
-
-                {/* Divers */}
-                <Route path="/admin/divisions" element={<DivisionsList />} />
-                <Route path="/admin/search" element={<GlobalSearch />} />
-                <Route path="/admin/statistics" element={<Statistics />} />
-
-                {/* Routes admin du blog */}
-                <Route path="/admin/blog" element={<BlogManager />} />
-                <Route path="/admin/suggestions" element={<SuggestionsManager />} />
-
-                {/* Super Admin uniquement */}
-                <Route path="/admin/settings" element={
-                  <AdminRoute superAdminOnly>
-                    <Settings />
-                  </AdminRoute>
-                } />
-                <Route path="/admin/admins" element={
-                  <AdminRoute superAdminOnly>
-                    <AdminsList />
-                  </AdminRoute>
-                } />
-              </Route>
+            {/* 🏠 Routes publiques avec RoleRedirect */}
+            <Route
+              element={
+                <PublicAccessGuard>
+                  <RoleRedirect>
+                    <Layout />
+                  </RoleRedirect>
+                </PublicAccessGuard>
+              }
+            >
+              <Route path="/home" element={<Home />} />
+              <Route path="/formations" element={<Formations />} />
+              <Route path="/formations/:id" element={<FormationDetail />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
             </Route>
 
-            {/* Route 404 - toujours en dernier */}
-            <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
+            {/* 🔐 Routes Admin avec protection */}
+            <Route
+              element={
+                <PublicAccessGuard>
+                  <AdminRoute>
+                    <AdminLayout />
+                  </AdminRoute>
+                </PublicAccessGuard>
+              }
+            >
+              <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="/admin/dashboard" element={<Dashboard />} />
+
+              {/* Formations */}
+              <Route path="/admin/formations" element={<FormationsList />} />
+              <Route path="/admin/formations/new" element={<FormationForm />} />
+              <Route path="/admin/formations/:id" element={<AdminFormationDetail />} />
+              <Route path="/admin/expense-memo/:id" element={<ExpenseMemoPage />} />
+              <Route path="/admin/reports/formation/:id" element={<FormationReport />} />
+
+              {/* Gestion */}
+              <Route path="/admin/enrollments" element={<EnrollmentsList />} />
+              <Route path="/admin/attendances" element={<AttendancesList />} />
+              <Route path="/admin/certificates" element={<CertificatesList />} />
+              <Route path="/admin/personal-trainings" element={<PersonalTrainingsList />} />
+
+              {/* Utilisateurs */}
+              <Route path="/admin/users" element={<UsersList />} />
+              <Route path="/admin/users/:id" element={<UserDetail />} />
+
+              {/* Divers */}
+              <Route path="/admin/divisions" element={<DivisionsList />} />
+              <Route path="/admin/search" element={<GlobalSearch />} />
+              <Route path="/admin/statistics" element={<Statistics />} />
+
+              {/* Blog admin */}
+              <Route path="/admin/blog" element={<BlogManager />} />
+              <Route path="/admin/suggestions" element={<SuggestionsManager />} />
+            </Route>
+
+            {/* 👑 Routes Super Admin (protection renforcée) */}
+            <Route
+              element={
+                <PublicAccessGuard>
+                  <AdminRoute superAdminOnly>
+                    <AdminLayout />
+                  </AdminRoute>
+                </PublicAccessGuard>
+              }
+            >
+              <Route path="/admin/settings" element={<Settings />} />
+              <Route path="/admin/admins" element={<AdminsList />} />
+            </Route>
+
+            {/* 404 - Page non trouvée */}
+            <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
   );
 }
+
+export default App;
