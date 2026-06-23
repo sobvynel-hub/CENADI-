@@ -4,11 +4,13 @@
  * 
  * Cette page s'affiche lorsque le Super Admin a activé le mode lockdown
  * et qu'un visiteur non connecté tente d'accéder au site.
+ * 
+ * Elle informe simplement que l'espace public est temporairement indisponible.
+ * Aucun bouton de connexion n'est affiché.
  */
 
-import { Shield, AlertTriangle, Clock, Lock, RefreshCw } from 'lucide-react';
+import { Shield, AlertTriangle, Clock } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import api from '../../../api/axios';
 
 export default function Maintenance() {
@@ -37,10 +39,6 @@ export default function Maintenance() {
     fetchStatus();
   }, []);
 
-  const handleRefresh = () => {
-    window.location.reload();
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -59,7 +57,7 @@ export default function Maintenance() {
             
             {/* Titre */}
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-              Site en maintenance
+              Espace public indisponible
             </h1>
             
             {/* Message personnalisé */}
@@ -80,42 +78,11 @@ export default function Maintenance() {
             
             {/* Date de dernière modification */}
             {lastUpdate && (
-              <div className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-6">
+              <div className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                 <Clock size={14} />
                 <span>Dernière mise à jour : {new Date(lastUpdate).toLocaleString()}</span>
               </div>
             )}
-            
-            {/* Message administrateur */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl mb-6">
-              <div className="flex items-center gap-2 justify-center mb-2">
-                <Lock size={14} className="text-slate-500" />
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  Accès administrateur
-                </p>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Si vous êtes administrateur, veuillez vous connecter pour accéder au tableau de bord.
-              </p>
-            </div>
-            
-            {/* Boutons d'action */}
-            <div className="space-y-3">
-              <Link
-                to="/login"
-                className="block w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2.5 px-4 rounded-xl transition-colors"
-              >
-                Se connecter (Administrateur)
-              </Link>
-              
-              <button
-                onClick={handleRefresh}
-                className="w-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold py-2.5 px-4 rounded-xl transition-colors hover:bg-slate-50 dark:hover:bg-slate-600 flex items-center justify-center gap-2"
-              >
-                <RefreshCw size={16} />
-                Rafraîchir la page
-              </button>
-            </div>
           </div>
         </div>
         
