@@ -16,11 +16,14 @@ export default function Login() {
   // Redirection automatique si déjà connecté
   useEffect(() => {
     if (user) {
-      const userRole = user?.role || user?.data?.role;
+      const userRole = user?.role;
       
+      // Admin / Super Admin → dashboard
       if (userRole === 'admin' || userRole === 'super_admin') {
         navigate('/admin/dashboard', { replace: true });
-      } else {
+      } 
+      // Personnel / Visiteur → home
+      else {
         navigate('/home', { replace: true });
       }
     }
@@ -42,7 +45,7 @@ export default function Login() {
       // Récupérer la page d'origine (si l'utilisateur a été redirigé)
       const from = location.state?.from || '/home';
       
-      // Rediriger selon le rôle et la page d'origine
+      // Rediriger selon le rôle
       if (userRole === 'admin' || userRole === 'super_admin') {
         // Si l'utilisateur venait d'une page admin, y retourner
         if (from.startsWith('/admin')) {
@@ -50,7 +53,9 @@ export default function Login() {
         } else {
           navigate('/admin/dashboard', { replace: true });
         }
-      } else {
+      } 
+      // Personnel / Visiteur → home
+      else {
         navigate(from, { replace: true });
       }
     } catch (err) {
@@ -169,8 +174,6 @@ export default function Login() {
               </Link>
             </p>
           </div>
-
-        
         </div>
       </div>
     </div>
