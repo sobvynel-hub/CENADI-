@@ -36,15 +36,10 @@ export default function Login() {
       
       console.log("✅ Connecté avec succès", response);
       
-      // Récupérer le rôle depuis la réponse
       const userRole = response?.role || response?.user?.role || user?.role;
-      
-      // Récupérer la page d'origine (si l'utilisateur a été redirigé)
       const from = location.state?.from || '/home';
       
-      // Rediriger selon le rôle
       if (userRole === 'admin' || userRole === 'super_admin') {
-        // Si l'utilisateur venait d'une page admin, y retourner
         if (from.startsWith('/admin')) {
           navigate(from, { replace: true });
         } else {

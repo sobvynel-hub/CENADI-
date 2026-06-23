@@ -130,7 +130,7 @@ export function AuthProvider({ children }) {
   const isSuperAdmin = user?.role === 'super_admin';
   const isAuthenticated = !!user && !!localStorage.getItem('cenadi_token');
 
-  // Déterminer si l'utilisateur est un admin (même déconnecté)
+  // ✅ Déterminer si l'utilisateur est un admin (même déconnecté)
   const isAdminRole = rememberedRole === 'admin' || rememberedRole === 'super_admin';
 
   const value = {
