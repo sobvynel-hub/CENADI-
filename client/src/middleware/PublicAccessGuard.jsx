@@ -34,7 +34,7 @@ export default function PublicAccessGuard() {
         console.log('📊 Statut accès public:', data?.publicAccess);
       } catch (error) {
         console.error('❌ Erreur vérification accès public:', error);
-        setPublicAccess({ enabled: true }); // Fallback: accès ouvert
+        setPublicAccess({ enabled: true });
       } finally {
         setChecking(false);
       }
@@ -49,25 +49,31 @@ export default function PublicAccessGuard() {
     return <Loader fullScreen text="Vérification de l'accès..." />;
   }
 
-  // 🚪 Routes d'authentification toujours accessibles (priorité maximale)
+  // 🚪 Routes d'authentification toujours accessibles
   const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
   if (authRoutes.includes(location.pathname)) {
     console.log('✅ Route d\'authentification, accès libre');
     return <Outlet />;
   }
 
-  // ✅ Si l'utilisateur est connecté
+  // ✅ SI L'UTILISATEUR EST CONNECTÉ
   if (isAuthenticated && user) {
     const isAdminUser = user.role === 'admin' || user.role === 'super_admin';
     console.log('👤 Utilisateur connecté:', user.email, 'Rôle:', user.role);
 
-    // ✅ Admin sur route publique → rediriger vers dashboard
+    // 🔴 REDIRECTION CRITIQUE: Admin sur route publique → dashboard
     if (isAdminUser && !location.pathname.startsWith('/admin')) {
       console.log('🔄 Admin sur route publique → redirection vers dashboard');
       return <Navigate to="/admin/dashboard" replace />;
     }
 
-    // ✅ Non-admin sur route admin → rediriger vers home
+    // 🔴 REDIRECTION CRITIQUE: Admin sur /home ou / → dashboard
+    if (isAdminUser && (location.pathname === '/' || location.pathname === '/home')) {
+      console.log('🔄 Admin sur /home → redirection vers dashboard');
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+
+    // 🔴 REDIRECTION CRITIQUE: Non-admin sur route admin → home
     if (!isAdminUser && location.pathname.startsWith('/admin')) {
       console.log('🔄 Non-admin sur route admin → redirection vers home');
       return <Navigate to="/home" replace />;
@@ -77,7 +83,7 @@ export default function PublicAccessGuard() {
     return <Outlet />;
   }
 
-  // ✅ Si le rôle est mémorisé mais user est null (refresh en cours)
+  // ✅ SI LE RÔLE EST MÉMORISÉ (refresh en cours)
   if (memorizedRole && !user) {
     const isAdminMemorized = memorizedRole === 'admin' || memorizedRole === 'super_admin';
     console.log('💾 Rôle mémorisé:', memorizedRole);
@@ -93,13 +99,11 @@ export default function PublicAccessGuard() {
   if (publicAccess?.enabled === false) {
     console.log('🔒 Mode LOCKDOWN activé');
 
-    // Si admin mémorisé ou user connecté → autoriser (ils ont accès)
     if (memorizedRole === 'admin' || memorizedRole === 'super_admin' || isAuthenticated) {
       console.log('✅ Admin ou utilisateur connecté, accès autorisé en lockdown');
       return <Outlet />;
     }
 
-    // Sinon → page maintenance
     console.log('🚫 Accès public bloqué → maintenance');
     return <Navigate to="/maintenance" replace />;
   }
