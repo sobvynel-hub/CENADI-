@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
         const token = localStorage.getItem('cenadi_token');
         const storedRole = localStorage.getItem('cenadi_role');
 
-        // ✅ Récupérer le rôle mémorisé
+        // Récupérer le rôle mémorisé
         if (storedRole) {
           setRememberedRole(storedRole);
         }
@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
             const response = await authApi.getMe();
             const userData = response.data?.user || response;
             setUser(userData);
-            // ✅ Mettre à jour le rôle mémorisé
+            // Mettre à jour le rôle mémorisé
             if (userData?.role) {
               localStorage.setItem('cenadi_role', userData.role);
               setRememberedRole(userData.role);
@@ -36,7 +36,6 @@ export function AuthProvider({ children }) {
             console.warn('Token invalide, nettoyage du stockage');
             localStorage.removeItem('cenadi_user');
             localStorage.removeItem('cenadi_token');
-            // ✅ Garder le rôle mémorisé même si token invalide
           }
         }
       } catch (err) {
@@ -67,8 +66,8 @@ export function AuthProvider({ children }) {
       setUser(userData);
       localStorage.setItem('cenadi_user', JSON.stringify(userData));
       localStorage.setItem('cenadi_token', token);
-      
-      // ✅ Stocker le rôle pour les futures visites
+
+      // Stocker le rôle pour les futures visites
       if (userData?.role) {
         localStorage.setItem('cenadi_role', userData.role);
         setRememberedRole(userData.role);
@@ -96,9 +95,34 @@ export function AuthProvider({ children }) {
       setError(null);
       localStorage.removeItem('cenadi_user');
       localStorage.removeItem('cenadi_token');
-      // ✅ Ne PAS supprimer le rôle mémorisé ! (pour la redirection future)
-      // localStorage.removeItem('cenadi_role'); ← NE PAS FAIRE CECI
+      // Ne PAS supprimer le rôle mémorisé
       toast.success('Déconnecté avec succès');
+    }
+  }, []);
+
+  const updateProfile = useCallback(async (data) => {
+    try {
+      const response = await authApi.updateProfile(data);
+      const updatedUser = response.data?.user || response;
+      setUser(updatedUser);
+      localStorage.setItem('cenadi_user', JSON.stringify(updatedUser));
+      toast.success('Profil mis à jour');
+      return updatedUser;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Erreur lors de la mise à jour';
+      toast.error(message);
+      throw err;
+    }
+  }, []);
+
+  const changePassword = useCallback(async (oldPassword, newPassword) => {
+    try {
+      await authApi.changePassword(oldPassword, newPassword);
+      toast.success('Mot de passe changé avec succès');
+    } catch (err) {
+      const message = err.response?.data?.message || 'Erreur lors du changement de mot de passe';
+      toast.error(message);
+      throw err;
     }
   }, []);
 
@@ -106,7 +130,7 @@ export function AuthProvider({ children }) {
   const isSuperAdmin = user?.role === 'super_admin';
   const isAuthenticated = !!user && !!localStorage.getItem('cenadi_token');
 
-  // ✅ Déterminer si l'utilisateur est un admin (même déconnecté)
+  // Déterminer si l'utilisateur est un admin (même déconnecté)
   const isAdminRole = rememberedRole === 'admin' || rememberedRole === 'super_admin';
 
   const value = {
@@ -120,8 +144,8 @@ export function AuthProvider({ children }) {
     isAdmin,
     isSuperAdmin,
     isAuthenticated,
-    rememberedRole,      // ✅ Rôle mémorisé
-    isAdminRole,         // ✅ Admin même déconnecté
+    rememberedRole,
+    isAdminRole,
   };
 
   return (

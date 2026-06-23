@@ -29,8 +29,8 @@ export default function PublicAccessGuard() {
     isAuthenticated, 
     isAdmin, 
     isSuperAdmin,
-    rememberedRole,    // ✅ Rôle mémorisé
-    isAdminRole        // ✅ True si le rôle mémorisé est admin
+    rememberedRole,
+    isAdminRole
   } = useAuth();
   
   const location = useLocation();
@@ -95,10 +95,9 @@ export default function PublicAccessGuard() {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // 2c. ✅ Vérifier le rôle mémorisé pour savoir où rediriger
+  // 2c. Vérifier le rôle mémorisé pour savoir où rediriger
   // Si l'utilisateur était admin avant (rôle mémorisé) → login
   // Sinon → home (espace public)
-  
   if (isAdminRole) {
     // C'est un admin (même déconnecté) → doit se réauthentifier
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
