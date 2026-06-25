@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Menu, Bell, User, LogOut, Settings, Moon, Sun, Home } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export default function AdminNavbar({ onMenuClick }) {
   const { user, logout } = useAuth();
   const { dark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -15,9 +16,7 @@ export default function AdminNavbar({ onMenuClick }) {
 
   // Charger les notifications (simulées pour l'instant)
   useEffect(() => {
-    // Exemple de données - à remplacer par un appel API réel
     const loadNotifications = async () => {
-      // Simulation d'appel API
       const mockNotifications = [
         { id: 1, message: 'Nouvelle inscription à "Excel Avancé"', read: false, time: 'il y a 5 min', type: 'enrollment' },
         { id: 2, message: 'Formation "Cybersécurité" complétée', read: false, time: 'il y a 1 heure', type: 'formation' },
@@ -31,7 +30,6 @@ export default function AdminNavbar({ onMenuClick }) {
   }, []);
 
   const markAsRead = async (id) => {
-    // Marquer une notification comme lue
     setNotifications(prev =>
       prev.map(n => n.id === id ? { ...n, read: true } : n)
     );
@@ -49,16 +47,15 @@ export default function AdminNavbar({ onMenuClick }) {
 
   const handleNotificationClick = (notif) => {
     markAsRead(notif.id);
-    // Redirection selon le type de notification
     switch (notif.type) {
       case 'enrollment':
-        window.location.href = '/admin/enrollments';
+        navigate('/admin/enrollments');
         break;
       case 'formation':
-        window.location.href = '/admin/formations';
+        navigate('/admin/formations');
         break;
       case 'certificate':
-        window.location.href = '/admin/certificates';
+        navigate('/admin/certificates');
         break;
       default:
         break;
@@ -70,6 +67,13 @@ export default function AdminNavbar({ onMenuClick }) {
     const firstName = user?.firstName || '';
     const lastName = user?.lastName || '';
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // ✅ Fonction pour aller à la page d'accueil (force la navigation)
+  const goToHome = () => {
+    // Utiliser window.location.href pour forcer une navigation complète
+    // et contourner les redirections automatiques de RoleRedirect
+    window.location.href = '/home';
   };
 
   return (
@@ -85,14 +89,15 @@ export default function AdminNavbar({ onMenuClick }) {
             <Menu size={20} className="text-slate-600 dark:text-slate-400" />
           </button>
 
-          <Link
-            to="/home"
+          {/* ✅ Bouton Accueil - Redirection vers /home avec window.location.href */}
+          <button
+            onClick={goToHome}
             className="flex items-center gap-2 p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             title="Retour à l'accueil"
           >
             <Home size={20} className="text-slate-600 dark:text-slate-400" />
             <span className="hidden sm:inline text-sm font-medium text-slate-700 dark:text-slate-300">Accueil</span>
-          </Link>
+          </button>
         </div>
 
         {/* Right Side */}
@@ -110,7 +115,6 @@ export default function AdminNavbar({ onMenuClick }) {
               )}
             </button>
 
-            {/* Dropdown Notifications */}
             {showNotifications && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
@@ -156,7 +160,7 @@ export default function AdminNavbar({ onMenuClick }) {
             )}
           </div>
 
-          {/* Theme Toggle (clair/sombre) */}
+          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
@@ -188,7 +192,6 @@ export default function AdminNavbar({ onMenuClick }) {
               </div>
             </button>
 
-            {/* Dropdown User Menu */}
             {showUserMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />

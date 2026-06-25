@@ -39,7 +39,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo - avec votre logo.jpg */}
+          {/* Logo */}
           <Link 
             to="/" 
             className="flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity duration-200"
@@ -55,7 +55,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav - UNIQUEMENT POUR LES ADMINS */}
           <div className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map(link => (
               <NavLink
@@ -73,19 +73,22 @@ export default function Navbar() {
                 {link.label}
               </NavLink>
             ))}
+            {/* ✅ Menu Admin visible UNIQUEMENT pour les admins */}
             {isAdmin && (
-              <NavLink
-                to="/admin/dashboard"
-                className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                    isActive
-                      ? 'text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-primary-700 dark:hover:text-primary-400 hover:bg-primary-50/70 dark:hover:bg-primary-900/10'
-                  }`
-                }
-              >
-                Admin
-              </NavLink>
+              <>
+                <NavLink
+                  to="/admin/dashboard"
+                  className={({ isActive }) =>
+                    `px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                      isActive
+                        ? 'text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-primary-700 dark:hover:text-primary-400 hover:bg-primary-50/70 dark:hover:bg-primary-900/10'
+                    }`
+                  }
+                >
+                  Admin
+                </NavLink>
+              </>
             )}
           </div>
 
@@ -119,24 +122,26 @@ export default function Navbar() {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                     <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-1 z-50 shadow-lg">
-                      <Link
-                        to="/admin/dashboard"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-700 dark:hover:text-primary-400 transition-colors"
-                      >
-                        <LayoutDashboard size={15} />
-                        Dashboard Admin
-                      </Link>
-                      {/* ✅ NOUVEAU : Lien vers le blog admin */}
-                      <Link
-                        to="/admin/blog"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-700 dark:hover:text-primary-400 transition-colors"
-                      >
-                        <Newspaper size={15} />
-                        Gérer le blog
-                      </Link>
-                      <hr className="my-1 border-slate-100 dark:border-slate-700" />
+                      {/* ✅ Menu du compte - UNIQUEMENT POUR LES ADMINS */}
+                      {isAdmin ? (
+                        <>
+                          <Link
+                            to="/admin/dashboard"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-700 dark:hover:text-primary-400 transition-colors"
+                          >
+                            <LayoutDashboard size={15} />
+                            Dashboard Admin
+                          </Link>
+                          <hr className="my-1 border-slate-100 dark:border-slate-700" />
+                        </>
+                      ) : (
+                        /* ✅ Pour les employés/visiteurs : pas de liens admin */
+                        <div className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">
+                          <p className="font-medium">👤 {getFullName()}</p>
+                          <p className="capitalize">{user?.role?.replace('_', ' ')}</p>
+                        </div>
+                      )}
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
@@ -185,14 +190,17 @@ export default function Navbar() {
                 {link.label}
               </NavLink>
             ))}
+            {/* ✅ Menu Admin visible UNIQUEMENT pour les admins */}
             {isAdmin && (
-              <NavLink 
-                to="/admin/dashboard" 
-                onClick={() => setMobileOpen(false)}
-                className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-              >
-                Admin
-              </NavLink>
+              <>
+                <NavLink 
+                  to="/admin/dashboard" 
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2.5 rounded-xl text-sm font-semibold bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400"
+                >
+                  Dashboard Admin
+                </NavLink>
+              </>
             )}
           </div>
         </div>

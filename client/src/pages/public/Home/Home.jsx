@@ -248,10 +248,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Link to="/formations" className="btn-primary mt-8 inline-flex">
-                Commencer maintenant
-                <ArrowRight size={16} />
-              </Link>
+              {/* ✅ Bouton "Commencer maintenant" supprimé pour éviter la redondance */}
             </div>
             <div className="relative">
               <div className="aspect-[4/3] bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-950 dark:to-primary-900 rounded-3xl overflow-hidden flex items-center justify-center">

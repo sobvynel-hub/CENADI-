@@ -103,7 +103,6 @@ export default function Dashboard() {
       pendingEnrollments: (rawStats.enrollments?.total ?? 0) - (rawStats.enrollments?.confirmed ?? 0),
       confirmedEnrollments: rawStats.enrollments?.confirmed ?? 0,
       totalCertificates: rawStats.certificates ?? 0,
-      satisfaction: rawStats.satisfaction ?? 94,
       pendingPersonalTrainings: rawStats.pendingPersonalTrainings ?? 0,
       monthlyEnrollments: buildMonthlyArray(rawStats.monthlyEnrollments),
       topFormations: rawStats.topFormations ?? [],
@@ -299,9 +298,6 @@ export default function Dashboard() {
     { label: 'Annulées', value: overview?.cancelledFormations || 0, color: '#ef4444' },
   ];
 
-  const satisfaction = overview?.satisfaction || 94;
-  const satisfactionColor = satisfaction >= 80 ? 'text-green-600 dark:text-green-400' : satisfaction >= 60 ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400';
-
   return (
     <div className="space-y-6 animate-in">
       {/* ── En-tête ── */}
@@ -359,39 +355,23 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* ── Section Satisfaction et Taux d'occupation ── */}
-      <div className="grid md:grid-cols-2 gap-5">
-        {/* Satisfaction */}
-        <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/10 rounded-2xl p-6 border border-primary-100 dark:border-primary-800">
-          <div className="flex items-center gap-3 mb-4">
-            <Activity size={24} className="text-primary-600 dark:text-primary-400" />
-            <h3 className="font-display font-semibold text-slate-900 dark:text-white">Satisfaction globale</h3>
-          </div>
-          <p className={`text-5xl font-display font-bold ${satisfactionColor}`}>{satisfaction}%</p>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Taux de satisfaction des apprenants</p>
-          <div className="mt-4 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-            <div className="h-full bg-primary-600 rounded-full transition-all duration-1000" style={{ width: `${satisfaction}%` }} />
-          </div>
+      {/* ── Taux d'occupation des inscriptions ── */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-4">
+          <Target size={24} className="text-emerald-600 dark:text-emerald-400" />
+          <h3 className="font-display font-semibold text-slate-900 dark:text-white">État des inscriptions</h3>
         </div>
-
-        {/* Taux d'occupation des inscriptions */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Target size={24} className="text-emerald-600 dark:text-emerald-400" />
-            <h3 className="font-display font-semibold text-slate-900 dark:text-white">État des inscriptions</h3>
+        <div className="h-48">
+          <canvas ref={doughnutRef} />
+        </div>
+        <div className="flex justify-center gap-6 mt-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-green-500" />
+            <span className="text-xs text-slate-600 dark:text-slate-400">Confirmées: {overview?.confirmedEnrollments || 0}</span>
           </div>
-          <div className="h-48">
-            <canvas ref={doughnutRef} />
-          </div>
-          <div className="flex justify-center gap-6 mt-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="text-xs text-slate-600 dark:text-slate-400">Confirmées: {overview?.confirmedEnrollments || 0}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-orange-500" />
-              <span className="text-xs text-slate-600 dark:text-slate-400">En attente: {overview?.pendingEnrollments || 0}</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-orange-500" />
+            <span className="text-xs text-slate-600 dark:text-slate-400">En attente: {overview?.pendingEnrollments || 0}</span>
           </div>
         </div>
       </div>
@@ -457,9 +437,8 @@ export default function Dashboard() {
             <table className="w-full">
               <thead className="bg-slate-50 dark:bg-slate-700/50">
                 <tr>
-                  {['Formation', 'Statut', 'Début', 'Participants'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{h}</th>
-                  ))}
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Formation</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Statut</th>
                 </tr>
               </thead>
               <tbody>
@@ -467,17 +446,10 @@ export default function Dashboard() {
                   <tr key={f._id || f.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                     <td className="px-4 py-3.5">
                       <p className="text-sm font-semibold text-slate-800 dark:text-white">{f.title}</p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500">{f.trainer}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">{f.trainer || f.location || 'CENADI'}</p>
                     </td>
-                    <td className="px-4 py-3.5"><Badge status={f.status} /></td>
-                    <td className="px-4 py-3.5 text-sm text-slate-600 dark:text-slate-400">{formatDate(f.startDate)}</td>
                     <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden w-16">
-                          <div className="h-full bg-primary-500 rounded-full" style={{ width: `${Math.min(((f.currentEnrolled || 0) / (f.maxCapacity || 1)) * 100, 100)}%` }} />
-                        </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{f.currentEnrolled ?? 0}/{f.maxCapacity ?? '∞'}</span>
-                      </div>
+                      <Badge status={f.status} />
                     </td>
                   </tr>
                 ))}

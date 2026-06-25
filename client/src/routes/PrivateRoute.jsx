@@ -66,6 +66,7 @@ export function AdminRoute({ children, superAdminOnly = false }) {
 
 /**
  * RoleRedirect — Redirige automatiquement selon le rôle
+ * ⚠️ MODIFICATION : N'intercepte PAS la navigation manuelle vers /home
  */
 export function RoleRedirect({ children }) {
   const { user, loading, isAdmin, memorizedRole } = useAuth();
@@ -80,27 +81,21 @@ export function RoleRedirect({ children }) {
 
   if (loading) return <Loader fullScreen text="Vérification..." />;
 
-  // Si connecté
-  if (user) {
-    // Admin sur page d'accueil → rediriger vers dashboard
-    if (isAdmin && (location.pathname === '/' || location.pathname === '/home')) {
-      console.log('🔄 Admin sur / ou /home → redirection dashboard');
+  // ✅ Si connecté et admin sur la racine UNIQUEMENT → rediriger vers dashboard
+  // Mais NE PAS rediriger si l'utilisateur a explicitement cliqué sur "Accueil"
+  if (user && isAdmin) {
+    // ✅ Uniquement rediriger si l'utilisateur est sur "/" (racine)
+    // ✅ Ne pas rediriger si l'utilisateur est sur "/home" (il a cliqué sur Accueil)
+    if (location.pathname === '/') {
+      console.log('🔄 Admin sur / → redirection dashboard');
       return <Navigate to="/admin/dashboard" replace />;
     }
+  }
 
-    // Admin sur une route publique → rediriger vers dashboard
-    if (isAdmin && !location.pathname.startsWith('/admin')) {
-      console.log('🔄 Admin sur route publique → redirection dashboard');
-      return <Navigate to="/admin/dashboard" replace />;
-    }
-
-    // Non-admin sur route admin → rediriger vers home
-    if (!isAdmin && location.pathname.startsWith('/admin')) {
-      console.log('🔄 Non-admin sur route admin → redirection home');
-      return <Navigate to="/home" replace />;
-    }
-
-    return children;
+  // Si connecté et non-admin sur route admin → rediriger vers home
+  if (user && !isAdmin && location.pathname.startsWith('/admin')) {
+    console.log('🔄 Non-admin sur route admin → redirection home');
+    return <Navigate to="/home" replace />;
   }
 
   // Si le rôle est mémorisé (refresh en cours)
