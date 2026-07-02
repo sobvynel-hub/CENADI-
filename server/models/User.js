@@ -4,6 +4,7 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { ROLES } = require('../utils/constants');
 
 const userSchema = new mongoose.Schema(
@@ -130,6 +131,28 @@ userSchema.methods.changedPasswordAfter = function (jwtTimestamp) {
     return jwtTimestamp < changedTimestamp;
   }
   return false;
+};
+
+/**
+ * ✅ Crée un token de réinitialisation de mot de passe
+ * Génère un token aléatoire, le hache et le stocke dans la BDD
+ * @returns {string} Le token brut (non hashé) à envoyer par email
+ */
+userSchema.methods.createPasswordResetToken = function() {
+  // 1. Générer un token aléatoire
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  
+  // 2. Hasher le token pour le stockage
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  
+  // 3. Définir la date d'expiration (10 minutes)
+  this.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
+  
+  // 4. Retourner le token brut (pour l'email)
+  return resetToken;
 };
 
 const User = mongoose.model('User', userSchema);

@@ -373,22 +373,6 @@ export default function FormationsList() {
     toast.success('Export Excel réussi');
   };
 
-  const handleExportCSV = () => {
-    const rows = filtered.map((f) => ({
-      'Titre':      f.title,
-      'Description':f.description,
-      'Formateur':  f.trainer,
-      'Niveau':     f.level,
-      'Date début': formatDate(f.startDate),
-      'Date fin':   formatDate(f.endDate),
-      'Lieu':       f.location,
-      'Statut':     STATUS_LABELS[f.status] || f.status,
-      'Publiée':    f.isPublic ? 'Oui' : 'Non',
-      'Coût':       f.cost ? `${f.cost.toLocaleString()} FCFA` : '0 FCFA',
-    }));
-    exportCSV(rows, 'formations_cenadi');
-  };
-
   // ─────────────────────────────────────────────────────────────────────────
   // Colonnes du tableau
   // Les handlers sont stables (useCallback) → useMemo est fiable
@@ -463,9 +447,6 @@ export default function FormationsList() {
           </button>
           <button type="button" onClick={handleExportExcel} className="btn-secondary">
             <FileSpreadsheet size={15} /> Export Excel
-          </button>
-          <button type="button" onClick={handleExportCSV} className="btn-secondary">
-            <Download size={15} /> Export CSV
           </button>
           <button
             type="button"

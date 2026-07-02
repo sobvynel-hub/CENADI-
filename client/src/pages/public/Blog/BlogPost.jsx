@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
-  ArrowLeft, Calendar, Eye, ThumbsUp, User, Tag, Share2, 
-  Bookmark, Heart, MessageCircle, Clock, ChevronLeft, 
-  ChevronRight, Check, Award, TrendingUp, Lightbulb, Globe, Zap,
+  ArrowLeft, Calendar, Eye, User, Tag, Share2, 
+  Heart, MessageCircle, Clock, ChevronLeft, 
+  ChevronRight, Check, Award, TrendingUp, Lightbulb,
   Building2, Newspaper
 } from 'lucide-react';
 import { blogApi } from '../../../api/blog';
 import Loader from '../../../components/common/Loader';
 import { formatDate } from '../../../utils/helpers';
+import toast from 'react-hot-toast';
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -16,6 +17,7 @@ export default function BlogPost() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => { loadPost(); }, [slug]);
@@ -24,26 +26,54 @@ export default function BlogPost() {
     try {
       setLoading(true);
       const response = await blogApi.getBySlug(slug);
-      setPost(response?.data || response);
-    } catch (err) { setError('Article introuvable'); }
-    finally { setLoading(false); }
+      const data = response?.data || response;
+      setPost(data);
+      setLikesCount(data.likes || 0);
+      // Si le backend retourne liked (via le champ likedBy + vérification), on le prend, sinon false
+      setLiked(data.liked || false);
+    } catch (err) { 
+      setError('Article introuvable'); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const handleLike = async () => {
-    if (liked) return;
     try {
-      await blogApi.like(post._id);
-      setPost({ ...post, likes: (post.likes || 0) + 1 });
-      setLiked(true);
-    } catch (error) { console.error(error); }
+      const response = await blogApi.like(post._id);
+      const data = response?.data || response;
+      setLikesCount(data.likes);
+      setLiked(data.liked);
+      toast.success(data.liked ? 'Vous aimez cet article' : 'Like retiré');
+    } catch (error) {
+      console.error(error);
+      toast.error('Erreur lors du like');
+    }
   };
 
   const handleShare = async () => {
+    const shareData = {
+      title: post.title,
+      text: `Découvrez cet article : ${post.title}`,
+      url: window.location.href,
+    };
+
     try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) { console.error(error); }
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success('Article partagé !');
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Lien copié dans le presse-papiers !');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        toast.error('Erreur lors du partage');
+        console.error(error);
+      }
+    }
   };
 
   if (loading) return <Loader fullScreen />;
@@ -76,15 +106,14 @@ export default function BlogPost() {
     return gradients[category] || 'from-primary-600 to-primary-700';
   };
 
-  // ✅ CORRIGÉ : Utilise des icônes Lucide, pas des émojis
   const getCategoryIcon = (category) => {
     const icons = {
       upcoming: Calendar,
       trending: TrendingUp,
       feedback: MessageCircle,
-      external: Building2,     // ← Changé: Globe → Building2 (plus professionnel)
+      external: Building2,
       suggestion: Lightbulb,
-      news: Newspaper          // ← Changé: Award → Newspaper
+      news: Newspaper
     };
     const Icon = icons[category] || Newspaper;
     return <Icon size={18} className="text-current" />;
@@ -132,12 +161,24 @@ export default function BlogPost() {
                 <ChevronLeft size={18} /><span>Tous les articles</span>
               </Link>
               <div className="flex items-center gap-3">
-                <button onClick={handleShare} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors relative">
+                <button 
+                  onClick={handleShare} 
+                  className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors relative"
+                  title="Partager l'article"
+                >
                   {copied ? <Check size={18} className="text-green-500" /> : <Share2 size={18} className="text-slate-500" />}
                 </button>
-                <button onClick={handleLike} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100 transition-colors">
+                <button 
+                  onClick={handleLike} 
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
+                    liked 
+                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' 
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-primary-50'
+                  }`}
+                  title={liked ? 'Retirer le like' : 'Aimer cet article'}
+                >
                   <Heart size={18} className={liked ? 'fill-primary-600 text-primary-600' : ''} />
-                  <span className="font-medium">{post.likes || 0}</span>
+                  <span className="font-medium">{likesCount}</span>
                 </button>
               </div>
             </div>

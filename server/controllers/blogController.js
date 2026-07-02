@@ -185,22 +185,47 @@ exports.deletePost = catchAsync(async (req, res, next) => {
 });
 
 /**
- * Ajoute un like à un article
+ * ✅ Ajoute ou retire un like (toggle) - Accessible à tous les utilisateurs authentifiés
  */
 exports.likePost = catchAsync(async (req, res, next) => {
-  const post = await BlogPost.findByIdAndUpdate(
-    req.params.id,
-    { $inc: { likes: 1 } },
-    { new: true }
-  );
-  
+  const userId = req.user._id;
+  const postId = req.params.id;
+
+  const post = await BlogPost.findById(postId);
   if (!post) {
     return next(new AppError('Article non trouvé', 404));
   }
-  
+
+  // Vérifier si l'utilisateur a déjà liké
+  const alreadyLiked = post.likedBy && post.likedBy.includes(userId);
+
+  let update;
+  if (alreadyLiked) {
+    // Retirer le like
+    update = {
+      $pull: { likedBy: userId },
+      $inc: { likes: -1 }
+    };
+  } else {
+    // Ajouter le like
+    update = {
+      $addToSet: { likedBy: userId },
+      $inc: { likes: 1 }
+    };
+  }
+
+  const updatedPost = await BlogPost.findByIdAndUpdate(
+    postId,
+    update,
+    { new: true }
+  );
+
   res.status(200).json({
     status: 'success',
-    data: { likes: post.likes },
+    data: {
+      likes: updatedPost.likes,
+      liked: !alreadyLiked // Nouvel état
+    }
   });
 });
 

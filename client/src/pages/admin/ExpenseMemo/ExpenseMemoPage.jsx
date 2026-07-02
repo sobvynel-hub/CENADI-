@@ -244,7 +244,9 @@ export default function ExpenseMemoPage() {
   };
 
   // ─── Rendu ────────────────────────────────────────────────────────────────
-  const isEditable = memo?.status === 'draft';
+  // ✅ MODIFICATION : isEditable = true pour permettre la modification quel que soit le statut.
+  // Le bouton "Soumettre" reste conditionné par le statut "draft", mais l'édition est toujours ouverte.
+  const isEditable = true; // ← Changement clé
   const isAdmin = true;
 
   if (error) {

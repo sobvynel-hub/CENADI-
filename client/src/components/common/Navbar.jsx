@@ -5,9 +5,9 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 
 const NAV_LINKS = [
-  { label: 'Accueil', path: '/' },
+  { label: 'Accueil', path: '/home' },      // ✅ Changé de '/' vers '/home'
   { label: 'Formations', path: '/formations' },
-  { label: 'Blog', path: '/blog' }, // ✅ NOUVEAU
+  { label: 'Blog', path: '/blog' },
   { label: 'À propos', path: '/about' },
   { label: 'Contact', path: '/contact' },
 ];
@@ -39,9 +39,9 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo - Redirige vers /home */}
           <Link 
-            to="/" 
+            to="/home"                      // ✅ Changé de '/' vers '/home'
             className="flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity duration-200"
             title="Retour à l'accueil"
           >
@@ -61,7 +61,7 @@ export default function Navbar() {
               <NavLink
                 key={link.path}
                 to={link.path}
-                end={link.path === '/'}
+                end={link.path === '/home'}  // ✅ Pour que le lien "Accueil" soit actif sur '/home'
                 className={({ isActive }) =>
                   `px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     isActive
@@ -177,7 +177,7 @@ export default function Navbar() {
               <NavLink
                 key={link.path}
                 to={link.path}
-                end={link.path === '/'}
+                end={link.path === '/home'}   // ✅ Pour que le lien "Accueil" soit actif sur '/home'
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
                   `block px-4 py-2.5 rounded-xl text-sm font-semibold ${

@@ -16,22 +16,24 @@ router.get('/', requirePublicAccess, blogController.getPublishedPosts);
 router.get('/stats', requirePublicAccess, blogController.getStats);
 router.get('/:slug', requirePublicAccess, blogController.getPostBySlug);
 
-// ============ ROUTES ADMIN (protégées) ============
+// ============ ROUTES AUTHENTIFIÉES (tous les utilisateurs connectés) ============
 router.use(protect);
+
+// ✅ Tous les utilisateurs connectés (employee, admin, super_admin) peuvent liker
+router.patch('/:id/like', blogController.likePost);
+
+// ✅ Route pour ajouter un commentaire (si vous voulez aussi l'ouvrir à tous)
+router.post('/:id/comment', blogController.addComment);
+
+// ============ ROUTES ADMIN (uniquement admins) ============
 router.use(restrictTo('admin', 'super_admin'));
 
-// Routes spécifiques admin
+// Routes spécifiques admin (CRUD complet)
 router.get('/admin/all', blogController.getAllPosts);
 router.get('/admin/stats', blogController.getStats);
 router.post('/', uploadCoverImage, blogController.createPost);
-
-// ✅ Supprimer ou commenter la ligne qui pose problème (generateAIPost n'existe pas)
-// router.post('/generate-ai', blogController.generateAIPost); // ← Supprimez cette ligne
-
 router.get('/admin/:id', blogController.getPostById);
 router.put('/:id', uploadCoverImage, blogController.updatePost);
 router.delete('/:id', blogController.deletePost);
-router.patch('/:id/like', blogController.likePost);
-router.post('/:id/comment', blogController.addComment);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
 import { authApi } from '../../../api/auth';
 import toast from 'react-hot-toast';
 
@@ -13,24 +13,28 @@ export default function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
-  const [tokenValid, setTokenValid] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // Vérifier la présence du token
   useEffect(() => {
-    if (!token) {
-      setTokenValid(false);
-      toast.error('Token de réinitialisation invalide');
+    if (!token || token.length < 10) {
+      setErrorMessage('Lien de réinitialisation invalide. Veuillez demander un nouveau lien.');
     }
   }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
 
+    // Validations
     if (password.length < 6) {
+      setErrorMessage('Le mot de passe doit contenir au moins 6 caractères.');
       toast.error('Le mot de passe doit contenir au moins 6 caractères');
       return;
     }
 
     if (password !== confirmPassword) {
+      setErrorMessage('Les mots de passe ne correspondent pas.');
       toast.error('Les mots de passe ne correspondent pas');
       return;
     }
@@ -40,60 +44,81 @@ export default function ResetPassword() {
       await authApi.resetPassword(token, password);
       setResetSuccess(true);
       toast.success('Mot de passe réinitialisé avec succès !');
+      
+      // Redirection après 3 secondes
       setTimeout(() => {
         navigate('/login');
       }, 3000);
     } catch (error) {
-      const message = error.response?.data?.message || 'Erreur lors de la réinitialisation';
-      toast.error(message);
-      if (error.response?.status === 400) {
-        setTokenValid(false);
+      const status = error.response?.status;
+      const message = error.response?.data?.message || 'Erreur lors de la réinitialisation.';
+      
+      if (status === 400) {
+        setErrorMessage('Le lien a expiré ou est invalide. Veuillez demander un nouveau lien.');
+        toast.error('Lien invalide ou expiré');
+      } else {
+        setErrorMessage(message);
+        toast.error(message);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  if (!tokenValid) {
+  // Affichage d'erreur initiale
+  if (errorMessage && !resetSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center">
+        <div className="max-w-md w-full">
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-8 shadow-xl">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div className="flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full mx-auto mb-4">
+              <AlertCircle size={32} className="text-red-600 dark:text-red-400" />
             </div>
-            <h2 className="text-2xl font-display font-bold text-slate-900 dark:text-white mb-2">
+            <h2 className="text-2xl font-display font-bold text-slate-900 dark:text-white text-center mb-3">
               Lien invalide
             </h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">
-              Ce lien de réinitialisation est invalide ou a expiré.
+            <p className="text-slate-500 dark:text-slate-400 text-center mb-6">
+              {errorMessage}
             </p>
-            <Link to="/forgot-password" className="btn-primary inline-flex items-center gap-2">
-              Demander un nouveau lien
-            </Link>
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/forgot-password"
+                className="btn-primary w-full text-center py-2.5"
+              >
+                Demander un nouveau lien
+              </Link>
+              <Link
+                to="/login"
+                className="text-sm text-slate-500 hover:text-primary-600 text-center transition-colors"
+              >
+                Retour à la connexion
+              </Link>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
+  // Affichage de succès
   if (resetSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center">
+        <div className="max-w-md w-full">
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-8 shadow-xl">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mx-auto mb-4">
               <CheckCircle size={32} className="text-green-600 dark:text-green-400" />
             </div>
-            <h2 className="text-2xl font-display font-bold text-slate-900 dark:text-white mb-2">
+            <h2 className="text-2xl font-display font-bold text-slate-900 dark:text-white text-center mb-3">
               Mot de passe réinitialisé !
             </h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">
+            <p className="text-slate-500 dark:text-slate-400 text-center mb-6">
               Votre mot de passe a été modifié avec succès. Vous allez être redirigé vers la page de connexion.
             </p>
-            <Link to="/login" className="btn-primary inline-flex items-center gap-2">
+            <Link
+              to="/login"
+              className="btn-primary w-full text-center py-2.5"
+            >
               Se connecter
             </Link>
           </div>
@@ -102,6 +127,7 @@ export default function ResetPassword() {
     );
   }
 
+  // Formulaire de réinitialisation
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
@@ -112,7 +138,7 @@ export default function ResetPassword() {
             </div>
             <h1 className="text-2xl font-display font-bold text-slate-900 dark:text-white">Nouveau mot de passe</h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
-              Choisissez un nouveau mot de passe sécurisé
+              Choisissez un mot de passe sécurisé (minimum 6 caractères)
             </p>
           </div>
 
@@ -135,7 +161,7 @@ export default function ResetPassword() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -160,12 +186,18 @@ export default function ResetPassword() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
+
+            {errorMessage && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
+                {errorMessage}
+              </div>
+            )}
 
             <button
               type="submit"
@@ -184,7 +216,10 @@ export default function ResetPassword() {
           </form>
 
           <div className="mt-6 text-center">
-            <Link to="/login" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary-600 transition-colors">
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary-600 transition-colors"
+            >
               <ArrowLeft size={14} />
               Retour à la connexion
             </Link>

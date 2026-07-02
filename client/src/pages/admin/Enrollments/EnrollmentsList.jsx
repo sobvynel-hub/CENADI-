@@ -18,7 +18,7 @@ import { usersApi } from '../../../api/users';
 import { formationsApi } from '../../../api/formations';
 import { divisionsApi } from '../../../api/divisions';
 import { attendancesApi } from '../../../api/attendances';
-import { formatDate, exportCSV } from '../../../utils/helpers';
+import { formatDate } from '../../../utils/helpers';
 
 const PER_PAGE = 10;
 
@@ -663,18 +663,47 @@ export default function EnrollmentsList() {
     },
   ];
 
-  const handleExport = () => {
-    const exportData = filtered.map(e => ({
-      Personnel: `${e.userId?.firstName || ''} ${e.userId?.lastName || ''}`,
-      Division: e.userId?.division || '',
-      Formation: e.formationId?.title || '',
-      Date: formatDate(e.registrationDate),
-      Statut: e.status,
-      Présence: e.attended ? 'Présent' : 'Absent',
-      Résultat: e.result === 'passed' ? 'Réussi' : e.result === 'failed' ? 'Échoué' : 'En attente',
-      Notes: e.notes || '',
+  // ✅ Nouvelle fonction d'export Excel (remplace l'export CSV)
+  const handleExportExcel = () => {
+    // Construire les données à exporter (mêmes colonnes que le tableau)
+    const exportRows = filtered.map((e) => ({
+      'Personnel': `${e.userId?.firstName || ''} ${e.userId?.lastName || ''}`,
+      'Division': e.userId?.division || '',
+      'Formation': e.formationId?.title || '',
+      'Date d\'inscription': formatDate(e.registrationDate || e.createdAt),
+      'Statut': e.status === 'confirmed' ? 'Confirmé' :
+               e.status === 'pending' ? 'En attente' :
+               e.status === 'cancelled' ? 'Annulé' :
+               e.status === 'failed' ? 'Échoué' :
+               e.status === 'passed' ? 'Réussi' : e.status || '',
+      'Présence': e.attended ? 'Présent' : 'Absent',
+      'Résultat': e.result === 'passed' ? 'Réussi' :
+                  e.result === 'failed' ? 'Échoué' :
+                  'En attente',
+      'Notes': e.notes || '',
     }));
-    exportCSV(exportData, 'inscriptions.csv');
+
+    // Créer une feuille de calcul
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    // Définir les largeurs de colonnes (optionnel)
+    worksheet['!cols'] = [
+      { wch: 25 }, // Personnel
+      { wch: 20 }, // Division
+      { wch: 40 }, // Formation
+      { wch: 18 }, // Date d'inscription
+      { wch: 15 }, // Statut
+      { wch: 12 }, // Présence
+      { wch: 15 }, // Résultat
+      { wch: 30 }, // Notes
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Inscriptions');
+
+    // Générer le fichier
+    const filename = `inscriptions_cenadi_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, filename);
+    toast.success('Export Excel réussi');
   };
 
   if (loading) return <Loader />;
@@ -692,8 +721,13 @@ export default function EnrollmentsList() {
             <FileSpreadsheet size={15} /> Importer Excel
             <input type="file" accept=".xlsx,.xls,.csv" onChange={handleImportExcel} className="hidden" />
           </label>
-          <button onClick={handleExport} className="btn-secondary"><Download size={15} /> Export CSV</button>
-          <button onClick={() => { setEditEnrollment(null); setShowForm(true); }} className="btn-primary"><Plus size={15} /> Nouvelle inscription</button>
+          {/* ✅ Remplacer Export CSV par Export Excel */}
+          <button onClick={handleExportExcel} className="btn-secondary">
+            <FileSpreadsheet size={15} /> Export Excel
+          </button>
+          <button onClick={() => { setEditEnrollment(null); setShowForm(true); }} className="btn-primary">
+            <Plus size={15} /> Nouvelle inscription
+          </button>
         </div>
       </div>
 
